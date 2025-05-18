@@ -38,20 +38,20 @@ This ensures only the explicitly authorized wallet can unseal the vault, not jus
   - any other string: at least one output must send BTC to that exact address
 - If `recipient_wallet` is **not present**, default to `"self"`
 
+### 4. **Amount Condition Check**
 
-### 4. **Fee Requirement Check**
-- Read `fee_requirement.type`:
-  - `fixed`: fee must equal `amount`
-  - `range`: fee must fall between `min` and `max`
-  - `random`: accept 10–1000 sats
-- Calculate fee as `inputs - outputs`
+- Read `amount_condition.type`:
+  - `fixed`: total amount spent must equal `amount`
+  - `range`: total amount spent must fall between `min` and `max`
+- Calculate `amount_spent = sum(inputs) - sum(change_outputs)`
+- The transaction must satisfy the defined amount condition.
+  
+### 5. **Recipient Match Check**
 
-### 5 **Amount and Recipient Match**
-- If `amount` is specified:
-  - The transaction must include an output sending **at least `amount` sats** to:
-    - the `authorized_wallet` (if `recipient_wallet = "self"` or omitted)
-    - any address (if `recipient_wallet = "ANY"`)
-    - the specified `recipient_wallet` (if explicitly set)
+- If `recipient_wallet` is:
+  - `"self"` (or omitted): at least one output must return funds to the sender’s wallet
+  - a specific address: at least one output must pay that address
+- `"ANY"` is not a valid `recipient_wallet` — use `"authorized_wallet": "ANY"` and `"recipient_wallet": "self"` for public vaults
 
 ### 6. **Block Height (Time Lock)**
 - If `time_lock` is present:
