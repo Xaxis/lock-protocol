@@ -31,29 +31,37 @@ Every `unseal()` attempt **must** validate the following:
 
 This ensures only the explicitly authorized wallet can unseal the vault, not just the one that created it.
 
-### 3. **Fee Requirement Check**
+### 3. **Recipient Wallet Match**
+- If `recipient_wallet` is set:
+  - `"self"`: at least one output must send BTC back to the sender (input) wallet
+  - `"ANY"`: skip this check
+  - any other string: at least one output must send BTC to that exact address
+- If `recipient_wallet` is **not present**, default to `"self"`
+
+
+### 4. **Fee Requirement Check**
 - Read `fee_requirement.type`:
   - `fixed`: fee must equal `amount`
   - `range`: fee must fall between `min` and `max`
   - `random`: accept 10–1000 sats
 - Calculate fee as `inputs - outputs`
 
-### 3.5 **Amount and Recipient Match**
+### 5 **Amount and Recipient Match**
 - If `amount` is specified:
   - The transaction must include an output sending **at least `amount` sats** to:
     - the `authorized_wallet` (if `recipient_wallet = "self"` or omitted)
     - any address (if `recipient_wallet = "ANY"`)
     - the specified `recipient_wallet` (if explicitly set)
 
-### 4. **Block Height (Time Lock)**
+### 6. **Block Height (Time Lock)**
 - If `time_lock` is present:
   - Current block height must be `>= time_lock`
 
-### 5. **Unlock Limit Enforcement**
+### 7. **Unlock Limit Enforcement**
 - If `unlock_limit` is present:
   - Use local or mirrored counter to ensure attempts are below limit
 
-### 6. **SEAL Integrity Check**
+### 8. **SEAL Integrity Check**
 - Decrypt SEAL only after all PoA checks pass
 - Validate encryption tag (e.g. GCM or Poly1305)
 - Reject if tag fails
@@ -80,6 +88,9 @@ if not is_confirmed(tx) or tx.replaceable:
 
 if vault.authorized_wallet != "ANY" and not tx_from_bound_wallet(tx, vault.authorized_wallet):
     raise Error("Unauthorized wallet")
+
+if not recipient_matches(tx, vault.recipient_wallet or "self"):
+    raise Error("Recipient wallet mismatch")
 
 if not fee_matches(tx, vault.fee_requirement):
     raise Error("Fee mismatch")
