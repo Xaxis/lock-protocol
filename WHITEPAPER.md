@@ -136,7 +136,7 @@ The user defines:
 
 - The digital secrets (e.g. files, messages, instructions) to include (which are encrypted into a SEAL)
 - The PoA conditions:
-    - **Fee logic** — fixed amount, defined range, or randomized default
+    - **Amount logic** — fixed amount, defined range, or randomized default
     - **Unlock count** — one-time, N-times, or infinite
     - **Time-lock** — optional block height constraint
     - **Metadata visibility** — encrypted by default, plaintext opt-in
@@ -380,8 +380,7 @@ As long as implementations remain compatible with LOCK’s validation rules, the
 This separation ensures LOCK remains stable, open, and **interoperable across platforms**, while still allowing innovation and customization at the client level.
 
 > 🔍 Note on Protocol Primitives
-From this point forward, short pseudocode blocks will appear where relevant. These are not full implementations or product code — they clarify core protocol logic in a language-neutral way. LOCK is a protocol, not an app. These snippets illustrate what must be enforced, not how it should be built.
-All signing and broadcasting is assumed to occur via external Bitcoin wallets. LOCK only validates.
+From this point forward, short pseudocode blocks will appear where relevant. These are not full implementations or product code — they clarify core protocol logic in a language-neutral way. LOCK is a protocol, not an app. These snippets illustrate what must be enforced, not how it should be built. All signing and broadcasting is assumed to occur via external Bitcoin wallets. LOCK only validates.
 > 
 
 ## **7. Protocol Primitives (Pseudocode)**
@@ -496,7 +495,12 @@ Vault metadata defines the PoA conditions. It is structured before sealing and i
 | `txid` | The transaction ID used to bind the vault |
 
 > 🔐 Clients may add additional metadata fields, but LOCK only enforces what it can validate on-chain.
-> 
+
+> 🧮 **Important Note:** LOCK does not validate Bitcoin miner fees directly.
+
+The `amount_condition` field defines how much must be spent in the unlock transaction (inputs minus change). This amount is part of the verifiable Proof-of-Access. Miner fees are paid naturally during broadcast but are not part of the validation logic.
+
+Clients should estimate and include a suitable miner fee based on mempool conditions (e.g., high/medium/low fee rate options), and allow users to override this in advanced mode — similar to common wallet UX like Sparrow, BlueWallet, or Electrum.
 
 ### 🔐 Metadata Encryption
 
@@ -523,7 +527,7 @@ Plaintext metadata is permitted for use cases like public drops or tamper-eviden
 Recommended mitigations include:
 
 - Encrypting metadata even when publishing the vault
-- Using randomized fee logic (e.g., `fee_requirement = random`)
+- Using randomized amount logic in a range (e.g., `amount_condition = range`)
 - Avoiding vault exposure until unlock is expected
 
 <aside>
