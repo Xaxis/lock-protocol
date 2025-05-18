@@ -92,8 +92,8 @@ if vault.authorized_wallet != "ANY" and not tx_from_bound_wallet(tx, vault.autho
 if not recipient_matches(tx, vault.recipient_wallet or "self"):
     raise Error("Recipient wallet mismatch")
 
-if not fee_matches(tx, vault.fee_requirement):
-    raise Error("Fee mismatch")
+if not amount_matches(vault.metadata.amount_condition, broadcast_tx):
+    raise Exception("Amount condition not satisfied")
 
 if vault.time_lock and current_block < vault.time_lock:
     raise Error("Too early")
