@@ -2,9 +2,11 @@
 
 <aside>
 
-Paper by **Bram Kanstein** ([https://x.com/bramk](https://x.com/bramk))
-Version: **1.0**
-Published: **May 18 2025**
+# Paper by **Bram Kanstein**  
+[https://x.com/bramk](https://x.com/bramk)
+
+**Version:** 1.0  
+**Published:** May 18, 2025
 
 </aside>
 
