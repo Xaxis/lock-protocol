@@ -17,15 +17,20 @@ To be LOCK-compliant, a client **must**:
   - `bind()` – validates and binds to a Bitcoin transaction
   - `unseal()` – verifies PoA and decrypts SEAL
   - `rebind()` – securely transfers ownership with old signature
-
+ 
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
-  - Verify amount conditions (`fixed`, or `range`) using `amount_condition` field
-  - Match `recipient_wallet` to an output destination (defaults to `"self"`)
-  - Verify block height is at or after `time_lock`, if set
-  - Reject unlock if vault is expired or limit exceeded
-  - Match `authorized_wallet` to the TX input signer
-  - Validate SEAL integrity (e.g. AES-GCM tag)
+  - Verify that the transaction is signed by the `authorized_wallet`
+  - Verify that `recipient_wallet` is satisfied:
+    - `"self"` → funds return to sender wallet
+    - a string → funds sent to that address
+    - omitted → defaults to `"self"`
+  - Verify `amount_condition` (fixed or range):
+    - Total spent amount must match the condition
+    - Calculate: `inputs - change_outputs`
+  - Verify block height is `>= time_lock`, if set
+  - Reject if unlock limit is exceeded
+  - Decrypt SEAL and validate encryption tag (AES-GCM, Poly1305, etc.)
 
 - Handle metadata and vault state deterministically:
   - Only derive `vault_id` after valid bind
