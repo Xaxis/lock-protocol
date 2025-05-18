@@ -1,6 +1,6 @@
 # LOCK Protocol
 
-> **Verifiable Access Through Proof-of-Work, Not Permission**
+> **A Bitcoin-based access protocol for encrypted secrets — verifiable access through proof-of-work, not permission.**
 
 **LOCK** is a minimal, open protocol that uses Bitcoin transactions as cryptographic proofs to unlock encrypted secrets — with no accounts, no passwords, and no servers.
 
