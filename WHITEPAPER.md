@@ -582,10 +582,11 @@ Defines a vault's unlock logic, then encrypts it.
 ```python
 python
 CopyEdit
-def create_metadata(wallet, amount, time_lock=None, unlock_limit=None, visibility="encrypted"):
+def create_metadata(wallet, amount_condition, recipient_wallet="self", time_lock=None, unlock_limit=None, visibility="encrypted"):
     metadata = {
         "authorized_wallet": wallet,
-        "amount_condition": amount,
+        "amount_condition": amount_condition,
+        "recipient_wallet": recipient_wallet,
         "time_lock": time_lock,
         "unlock_limit": unlock_limit,
         "visibility": visibility
