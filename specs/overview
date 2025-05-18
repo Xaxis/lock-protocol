@@ -1,0 +1,45 @@
+# LOCK Protocol Specs Overview
+
+This folder contains the full technical specification for the **LOCK protocol** — a minimal, Bitcoin-based system for access control using proof-of-work instead of permission.
+
+Each document defines a core part of the protocol. Together, they form the reference standard for any compliant LOCK implementation.
+
+---
+
+## 📦 Included Specs
+
+| File | Purpose |
+|------|---------|
+| `SEAL_FORMAT_SPEC.md` | Defines the encrypted payload container (SEAL) structure |
+| `VAULT_METADATA_SPEC.md` | Schema and encryption rules for vault metadata |
+| `POA_VALIDATION_RULES.md` | Rules for validating Bitcoin transactions as unlock proofs |
+| `UNLOCK_COUNTER.md` | Guidance for off-chain unlock count enforcement |
+| `REBIND_GUIDE.md` | How to securely transfer vault ownership between wallets |
+| `CLIENT_COMPLIANCE.md` | Minimum behaviors required for compliant clients |
+| `KEY_DERIVATION.md` | Secure derivation of metadata encryption keys using ECDH + HKDF |
+| `WALLETS_README.md` | Notes on PSBT signing, wallet integrations, and secure UX flows |
+
+---
+
+## 🔐 Protocol Responsibilities
+
+The LOCK protocol enforces:
+
+- Secure sealing and binding of encrypted content to a wallet
+- Unlock gating via confirmed, valid Bitcoin transactions
+- Stateless, client-enforced logic via metadata and validation rules
+
+The protocol does *not* define:
+
+- User interfaces
+- Vault storage infrastructure
+- Private key handling
+- Network communications
+
+These responsibilities belong to the client.
+
+---
+
+## 📜 License
+
+MIT — freely usable, forkable, and buildable.
