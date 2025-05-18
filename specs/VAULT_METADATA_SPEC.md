@@ -19,6 +19,17 @@ Vault metadata defines how a sealed vault can be unlocked under the LOCK protoco
 | `visibility` | string | Either `encrypted` (default) or `plaintext` |
 | `version` | int | Metadata schema version (e.g., `1`) |
 
+#### Clarifying `recipient_wallet` Values
+
+| Value         | Meaning                                              |
+|---------------|------------------------------------------------------|
+| `"self"`      | Funds must return to the unlocking (sender) wallet   |
+| `btc address` | Must pay a specific external address                 |
+| _omitted_     | Treated as `"self"` by default                       |
+
+Only `"self"` or a specific wallet address should be used.  
+`"ANY"` is **not valid** for `recipient_wallet` — it is only used for `authorized_wallet` to define **who may unseal**, not **who must be paid**.
+
 ---
 
 ## 🛡️ Default Behavior
