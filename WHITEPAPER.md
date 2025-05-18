@@ -582,10 +582,10 @@ Defines a vault's unlock logic, then encrypts it.
 ```python
 python
 CopyEdit
-def create_metadata(wallet, fee, time_lock=None, unlock_limit=None, visibility="encrypted"):
+def create_metadata(wallet, amount, time_lock=None, unlock_limit=None, visibility="encrypted"):
     metadata = {
         "authorized_wallet": wallet,
-        "fee_requirement": fee,
+        "amount_condition": amount,
         "time_lock": time_lock,
         "unlock_limit": unlock_limit,
         "visibility": visibility
@@ -688,9 +688,9 @@ A vault with **explicit support for future ownership changes**.
 
 ### 🌐 9.6 Ultra-Minimal PoA Vault
 
-A vault that can only be unsealed by submitting a transaction with a **matching fee**, from a specific wallet — no additional metadata, no OP_RETURN, no UI.
+A vault that can only be unsealed by submitting a transaction with a **matching amount**, from a specific wallet — no additional metadata, no OP_RETURN, no UI.
 
-- `fee_requirement = fixed`
+- `amount_condition = fixed`
 - `authorized_wallet = required`
 - Clients validate unlock purely from on-chain transaction matching
 
@@ -705,10 +705,10 @@ Use cases:
 
 **📥 9.7 Pay-to-Access Vault**
 
-A vault that anyone can unlock — if they pay the defined fee.
+A vault that anyone can unlock — if they pay the defined amount.
 
 - `authorized_wallet = ANY`
-- `fee_requirement = fixed (e.g. 0.01 BTC)`
+- `amount_condition = fixed`
 - `time_lock` optional
 
 Use cases:
@@ -918,7 +918,7 @@ LOCK ensures that a sealed vault can only be unsealed if a user:
 
 - Controls the correct wallet
 - Broadcasts a valid Bitcoin transaction
-- Satisfies all PoA metadata constraints (fee, block height, unlock limit, etc.)
+- Satisfies all PoA metadata constraints (amount, block height, unlock limit, etc.)
 
 The protocol enforces this logic cryptographically, without needing:
 
