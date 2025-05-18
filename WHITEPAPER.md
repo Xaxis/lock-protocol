@@ -248,6 +248,7 @@ To unseal a vault, a user submits a Bitcoin transaction. The PoA engine performs
 | --- | --- |
 | **Origin Address Match*** | Ensures the transaction is signed by the bound wallet |
 | **Fee Condition Match** | Verifies the transaction fee matches the required amount/range |
+| **Recipient Match** | Confirms the BTC was sent to the required wallet (self or third party) |
 | **Time-lock Match** | Confirms block height is at or beyond minimum required height |
 | **Unlock Count Match** | Ensures the vault hasn’t been unsealed too many times (if limited) |
 | **TXID Validation** | Confirms the transaction is real, confirmed, and unique |
