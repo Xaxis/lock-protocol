@@ -284,6 +284,9 @@ These transaction patterns allow LOCK vaults to enforce access via:
 
 > Self-spend remains the **default PoA trigger** — minimal, auditable, and sovereign.
 
+> Note: LOCK does not validate miner fees directly.
+The `amount_condition` field specifies how much must be spent in the unlock transaction — not how much is paid as fee. Clients should estimate and include a suitable network fee based on mempool conditions, but only the total **spent amount** (inputs minus change) is validated for PoA.
+
 ### ⏱ Time-Locks via Block Height
 
 LOCK supports time-based unlocks by using **Bitcoin block height**, not wall time. This makes time-locks tamper-resistant and globally verifiable.
@@ -511,7 +514,7 @@ This ensures:
 
 - Unlock conditions are **not visible** to observers unless made public
 - Vaults cannot be profiled or targeted based on unlock logic
-- Attackers cannot guess fee requirements or time-lock values
+- Attackers cannot guess amount conditions or time-lock values
 
 Plaintext metadata is permitted for use cases like public drops or tamper-evident broadcasting, but must be opted into explicitly.
 
