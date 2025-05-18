@@ -20,7 +20,7 @@ To be LOCK-compliant, a client **must**:
 
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
-  - Verify amount conditions (`fixed`, or `range`)
+  - Verify amount conditions (`fixed`, or `range`) using `amount_condition` field
   - Match `recipient_wallet` to an output destination (defaults to `"self"`)
   - Verify block height is at or after `time_lock`, if set
   - Reject unlock if vault is expired or limit exceeded
