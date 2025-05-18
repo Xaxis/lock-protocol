@@ -86,14 +86,14 @@ Reject unlock if:
 if not is_confirmed(tx) or tx.replaceable:
     raise Error("TX not confirmed or replaceable")
 
-if vault.authorized_wallet != "ANY" and not tx_from_bound_wallet(tx, vault.authorized_wallet):
+if vault.authorized_wallet != "ANY" and not tx_from_authorized_wallet(tx, vault.metadata.authorized_wallet):
     raise Error("Unauthorized wallet")
 
 if not recipient_matches(tx, vault.recipient_wallet or "self"):
     raise Error("Recipient wallet mismatch")
 
-if not amount_matches(vault.metadata.amount_condition, broadcast_tx):
-    raise Exception("Amount condition not satisfied")
+if not amount_matches(vault.metadata.amount_condition, tx):
+    raise Error("Amount condition not satisfied")
 
 if vault.time_lock and current_block < vault.time_lock:
     raise Error("Too early")
