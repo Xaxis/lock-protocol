@@ -31,13 +31,19 @@ Every `unseal()` attempt **must** validate the following:
 
 This ensures only the explicitly authorized wallet can unseal the vault, not just the one that created it.
 
-
 ### 3. **Fee Requirement Check**
 - Read `fee_requirement.type`:
   - `fixed`: fee must equal `amount`
   - `range`: fee must fall between `min` and `max`
   - `random`: accept 10–1000 sats
 - Calculate fee as `inputs - outputs`
+
+### 3.5 **Amount and Recipient Match**
+- If `amount` is specified:
+  - The transaction must include an output sending **at least `amount` sats** to:
+    - the `authorized_wallet` (if `recipient_wallet = "self"` or omitted)
+    - any address (if `recipient_wallet = "ANY"`)
+    - the specified `recipient_wallet` (if explicitly set)
 
 ### 4. **Block Height (Time Lock)**
 - If `time_lock` is present:
