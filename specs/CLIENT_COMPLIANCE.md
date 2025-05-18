@@ -21,6 +21,7 @@ To be LOCK-compliant, a client **must**:
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
   - Verify fee conditions (`fixed`, `range`, or `random`)
+  - Match `recipient_wallet` to an output destination (defaults to `"self"`)
   - Verify block height is at or after `time_lock`, if set
   - Reject unlock if vault is expired or limit exceeded
   - Match `authorized_wallet` to the TX input signer
