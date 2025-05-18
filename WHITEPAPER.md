@@ -42,7 +42,7 @@ A Bitcoin transaction is the key.
 
 And access is determined by energy and ownership — not by trust.
 
-This is access as projection of force: the act of spending sats becomes the cryptographic trigger for revealing truth. Whether the secret is a file, a phrase, or an instruction, **only someone who proves wallet control and pays a defined fee** can unseal it. (Throughout this paper, we use **unseal** instead of *unlock* to reflect the cryptographic nature of access in LOCK.)
+This is access as projection of force: the act of spending sats becomes the cryptographic trigger for revealing truth. Whether the secret is a file, a phrase, or an instruction, **only someone who proves wallet control and pays a defined amount** can unseal it. (Throughout this paper, we use **unseal** instead of *unlock* to reflect the cryptographic nature of access in LOCK.)
 
 LOCK extends Bitcoin’s security guarantees to **file systems**, **dead drops**, **time-locked payloads**, and even **physical safes**. If it can be encrypted, it can be sealed. If it can be validated by the blockchain, it can be unsealed — **permissionless.**
 
@@ -75,7 +75,7 @@ SAL redefines access as something **you control**, not something a (centralized)
 LOCK defines a system for sealing encrypted data (called a **SEAL**) and binding it to a specific Bitcoin wallet using a real Bitcoin transaction. The core components are:
 
 - **SEAL** – The encrypted file itself.
-- **Vault Metadata** – Defines how the file can be unsealed (fee rules, time-locks, wallet requirements, access limits).
+- **Vault Metadata** – Defines how the file can be unsealed (amount rules, time-locks, wallet requirements, access limits).
 - **Binding Transaction** – A small, signed Bitcoin transaction that cryptographically proves wallet ownership.
 - **Proof-of-Access (PoA)** – The validation engine that checks whether an unlock attempt matches the required conditions.
 
@@ -236,7 +236,7 @@ Clients must agree on these conventions to ensure cross-compatibility. Diverging
 Once a vault is sealed and bound, it becomes accessible **only through a Bitcoin transaction** that satisfies its unlock conditions. This is the essence of **Proof-of-Access (PoA)** — a protocol-verified check that confirms:
 
 - **The transaction is from the correct wallet**
-- **The fee paid matches the required logic**
+- **The amount paid matches the required logic**
 - **The transaction occurs after any time-lock (block height)**
 - **The vault has not exceeded its unlock limit**
 
