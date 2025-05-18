@@ -43,7 +43,7 @@ To be LOCK-compliant, a client **must**:
 A client is **not LOCK-compliant** if it:
 
 - Decrypts the SEAL without checking PoA
-- Ignores fee or time constraints
+- Ignores amount or time constraints
 - Accepts RBF-enabled transactions as binding
 - Accepts transactions without confirming wallet ownership
 - Fakes unlock count or skips counter enforcement
