@@ -429,8 +429,8 @@ def unseal(vault, broadcast_tx):
     if not tx_from_authorized_wallet(broadcast_tx, vault.metadata.authorized_wallet):
         raise Exception("Wallet mismatch")
     
-    if not fee_matches(vault.metadata.fee_rules, broadcast_tx):
-        raise Exception("Fee condition not satisfied")
+    if not amount_matches(vault.metadata.amount_condition, broadcast_tx):
+    raise Exception("Amount condition not satisfied")
 
     if not recipient_matches(vault.metadata.recipient_wallet or "self", broadcast_tx):
         raise Exception("Recipient wallet mismatch")
