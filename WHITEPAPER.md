@@ -152,7 +152,7 @@ The protocol generates a **PSBT** for the user:
 - A Bitcoin transaction that either sends funds:
   - back to the sender (a self-spend), or
   - to a specific `recipient_wallet` address
-- The fee is specified by the `fee_requirement` field in the vault metadata
+- The amount is specified by the `amount_condition` field in the vault metadata (Can be fixed or a randomized range)
 
 The user signs and broadcasts this transaction from the **wallet that will own the vault**.
 
@@ -249,7 +249,7 @@ To unseal a vault, a user submits a Bitcoin transaction. The PoA engine performs
 | Condition | Purpose |
 | --- | --- |
 | **Origin Address Match*** | Ensures the transaction is signed by the bound wallet |
-| **Fee Condition Match** | Verifies the transaction fee matches the required amount/range |
+| **Amount Condition Match** | Verifies the total amount spent in the transaction matches the required amount/range |
 | **Recipient Match** | Confirms the BTC was sent to the required wallet (self or third party) |
 | **Time-lock Match** | Confirms block height is at or beyond minimum required height |
 | **Unlock Count Match** | Ensures the vault hasn’t been unsealed too many times (if limited) |
@@ -486,7 +486,7 @@ Vault metadata defines the PoA conditions. It is structured before sealing and i
 | Field | Description |
 | --- | --- |
 | `authorized_wallet` | The wallet address that must sign the unlock transaction (or `ANY` to allow public unlocks) |
-| `fee_requirement` | Either a fixed fee, a fee range, or randomized range (e.g. 10–1000 sats) |
+| `amount_condition` | The required Bitcoin amount to be spent in the unlock transaction. Can be fixed or a randomized range |
 | `time_lock` | Optional minimum block height required before unsealing |
 | `unlock_limit` | Optional number of allowed unseals (1-time, N-time, infinite) |
 | `visibility` | Either `encrypted` (default) or `plaintext` |
