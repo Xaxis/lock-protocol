@@ -8,6 +8,10 @@ It introduces a **Sovereign Access Layer (SAL)** where digital secrets are not g
 
 ---
 
+Created by: Bram Kanstein ([@bramk](https://x.com/bramk))
+
+---
+
 ## 🔒 What Is LOCK?
 
 LOCK turns access control into an act of energy:
