@@ -1,0 +1,29 @@
+# 📊 LOCK Protocol Diagrams
+
+This folder contains editable and exportable diagrams that illustrate the core flow and logic of the LOCK protocol.
+
+## Included Diagrams
+
+| File | Description |
+|------|-------------|
+| `vault_lifecycle.mmg` | Editable diagram of the full vault lifecycle: seal → bind → finalize → unseal |
+| `vault_lifecycle.svg` | SVG export of the above for viewing or embedding |
+| `rebind_flow.mmg` | Editable diagram of secure vault ownership transfer via rebind |
+| `rebind_flow.svg` | SVG export of the above for documentation and apps |
+
+## Format & Tools
+
+- `.mmg`: Use [tldraw](https://tldraw.dev/) or compatible tool to edit
+- `.svg`: Use any vector viewer or embed in docs
+
+## Roadmap
+
+Additional diagrams under consideration:
+- PoA validation engine logic
+- Metadata encryption + derivation
+- Threat model visualization
+- SEAL + vault_id construction overview
+
+## License
+
+MIT — free to reuse, adapt, and publish in client apps, explainers, or documentation.
