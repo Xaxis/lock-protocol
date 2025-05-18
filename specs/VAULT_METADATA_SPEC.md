@@ -47,15 +47,45 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 
 ---
 
-## 🔁 Example (Before Encryption)
+## 🔁 Example (Before Encryption - as a self-spend)
 
 ```json
 {
   "authorized_wallet": "bc1qxyz...",
+  "recipient_wallet": "self",
+  "amount": 10000,
   "fee_requirement": { "type": "fixed", "amount": 500 },
   "time_lock": 850000,
   "unlock_limit": 1,
   "visibility": "encrypted",
+  "version": 1
+}
+```
+
+## 🔁 Example (Before Encryption - as a spend to an external recipient)
+
+```json
+{
+  "authorized_wallet": "bc1qxyz...",
+  "recipient_wallet": "bc1qtarget...",
+  "amount": 10000,
+  "fee_requirement": { "type": "fixed", "amount": 500 },
+  "time_lock": 850000,
+  "unlock_limit": 1,
+  "visibility": "encrypted",
+  "version": 1
+}
+```
+
+## 🔁 Example (Before Encryption - as a pay-to-unseal vault)
+
+```json
+{
+  "authorized_wallet": "ANY",
+  "recipient_wallet": "ANY",
+  "amount": 10000,
+  "fee_requirement": { "type": "fixed", "amount": 500 },
+  "visibility": "plaintext",
   "version": 1
 }
 ```
