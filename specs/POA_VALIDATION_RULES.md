@@ -73,7 +73,7 @@ This ensures only the explicitly authorized wallet can unseal the vault, not jus
 Reject unlock if:
 - Transaction is unconfirmed or replaceable (RBF)
 - Wallet mismatch
-- Fee mismatch
+- Amount mismatch
 - Unlock before time-lock
 - Unlock limit exceeded
 - SEAL tag fails decryption
