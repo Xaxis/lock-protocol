@@ -12,7 +12,7 @@ Vault metadata defines how a sealed vault can be unlocked under the LOCK protoco
 |-------|------|-------------|
 | `authorized_wallet` | string | Wallet address that must sign the unlock TX (`"ANY"` = public access) |
 | `fee_requirement` | object | Fee type: `fixed`, `range`, or `random` |
-| `recipient_wallet` | string (optional) | Address that must receive BTC in the unlock transaction. `"self"` = sender wallet; `"ANY"` = no restriction |
+| recipient_wallet | string (optional) | Where the unlock transaction must send amount. "self" = send back to sender. If omitted, defaults to "self" |
 | `txid` | string | Set during `bind()` — TX that anchors ownership |
 | `time_lock` | int (optional) | Min block height before unlock allowed |
 | `unlock_limit` | int (optional) | Max number of valid unseals allowed |
@@ -48,7 +48,7 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 
 ---
 
-## 🔁 Example (Before Encryption - as a self-spend)
+## 🔁 Example (Before Encryption - as a self-spend to owner)
 
 ```json
 {
@@ -63,7 +63,7 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 }
 ```
 
-## 🔁 Example (Before Encryption - as a spend to an external recipient)
+## 🔁 Example (Before Encryption - as a spend to external address)
 
 ```json
 {
@@ -78,12 +78,12 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 }
 ```
 
-## 🔁 Example (Before Encryption - as a pay-to-unseal vault)
+## 🔁 Example (Before Encryption - as a public pay-to-unseal-vault)
 
 ```json
 {
   "authorized_wallet": "ANY",
-  "recipient_wallet": "self",
+  "recipient_wallet": "bc1qvaultowner...",
   "amount": 10000,
   "fee_requirement": { "type": "fixed", "amount": 500 },
   "visibility": "plaintext",
