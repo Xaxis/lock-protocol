@@ -53,7 +53,7 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 
 - Encrypt **all** metadata unless explicitly opting into `visibility = plaintext`
 - For public `authorized_wallet = "ANY"` vaults, to prevent front-running:
-  - Use randomized or high fee thresholds
+  - Use high range or high amount thresholds
   - Encrypt metadata even if the SEAL is intended to be public
   - Avoid early exposure of vault metadata
 
