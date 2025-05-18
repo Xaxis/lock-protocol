@@ -11,7 +11,7 @@ Vault metadata defines how a sealed vault can be unlocked under the LOCK protoco
 | Field | Type | Description |
 |-------|------|-------------|
 | `authorized_wallet` | string | Wallet address that must sign the unlock TX (`"ANY"` = public access) |
-| `fee_requirement` | object | Fee type: `fixed`, `range`, or `random` |
+| `amount_condition` | object | Required satoshi amount to be spent in the unlock TX. Type can be `fixed` or `range`. Clients may optionally choose a random value within the range. |
 | recipient_wallet | string (optional) | Where the unlock transaction must send amount. "self" = send back to sender. If omitted, defaults to "self" |
 | `txid` | string | Set during `bind()` — TX that anchors ownership |
 | `time_lock` | int (optional) | Min block height before unlock allowed |
@@ -65,8 +65,10 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 {
   "authorized_wallet": "bc1qxyz...",
   "recipient_wallet": "self",
-  "amount": 10000,
-  "fee_requirement": { "type": "fixed", "amount": 500 },
+  "amount_condition": {
+    "type": "fixed",
+    "amount": 10000
+  },
   "time_lock": 850000,
   "unlock_limit": 1,
   "visibility": "encrypted",
@@ -80,8 +82,11 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 {
   "authorized_wallet": "bc1qxyz...",
   "recipient_wallet": "bc1qtarget...",
-  "amount": 10000,
-  "fee_requirement": { "type": "fixed", "amount": 500 },
+  "amount_condition": {
+    "type": "range",
+    "min": 10000,
+    "max": 50000
+  },
   "time_lock": 850000,
   "unlock_limit": 1,
   "visibility": "encrypted",
@@ -95,9 +100,13 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
 {
   "authorized_wallet": "ANY",
   "recipient_wallet": "bc1qvaultowner...",
-  "amount": 10000,
-  "fee_requirement": { "type": "fixed", "amount": 500 },
-  "visibility": "plaintext",
+  "amount_condition": {
+    "type": "fixed",
+    "amount": 10000
+  },
+  "time_lock": 850000,
+  "unlock_limit": 1,
+  "visibility": "encrypted",
   "version": 1
 }
 ```
