@@ -35,6 +35,13 @@ To be LOCK-compliant, a client **must**:
   - Store unlock count persistently
   - Warn on conflicts or ambiguity
   - Optionally support `.unlocklog.json` audit trails
+ 
+> 🧮 **Important Note on Miner Fees:**
+
+LOCK does **not** validate Bitcoin miner fees directly.  
+The `amount_condition` defines how much BTC must be **spent** in the unlock transaction (inputs minus change). This amount is what gets cryptographically enforced via PoA.
+
+Clients are expected to estimate and include a suitable network fee based on mempool conditions. This can be offered as low/medium/high presets or manually adjusted, similar to UX in wallets like Sparrow, Electrum, or BlueWallet.
 
 ---
 
