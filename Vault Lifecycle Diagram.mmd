@@ -1,0 +1,12 @@
+flowchart TD
+    A["Start: Seal Request"] --> B["Encrypt files into SEAL"]
+    B --> C["Define unlock metadata"]
+    C --> D["Generate PSBT for binding"]
+    D --> E["User signs & broadcasts TX"]
+    E --> F["Record TXID in metadata"]
+    F --> G["Generate vault_id = hash(SEAL + metadata + TXID)"]
+    G --> H["Vault is finalized"]
+    H --> I["User attempts to unseal"]
+    I --> J{"Valid PoA TX?"}
+    J -- Yes --> K["Decrypt SEAL"]
+    J -- No --> L["Reject attempt"]

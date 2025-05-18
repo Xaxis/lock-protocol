@@ -1,0 +1,9 @@
+flowchart TD
+    A[Current vault is bound] --> B[User initiates rebind]
+    B --> C[New binding TX created]
+    C --> D[Old wallet signs TXID]
+    D --> E{Valid signature?}
+    E -- Yes --> F[Update vault.txid]
+    F --> G[Recompute vault_id]
+    G --> H[Vault now bound to new wallet]
+    E -- No --> I[Reject rebind attempt]
