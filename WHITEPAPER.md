@@ -423,7 +423,10 @@ def unseal(vault, broadcast_tx):
     
     if not fee_matches(vault.metadata.fee_rules, broadcast_tx):
         raise Exception("Fee condition not satisfied")
-    
+
+    if not recipient_matches(vault.metadata.recipient_wallet or "self", broadcast_tx):
+        raise Exception("Recipient wallet mismatch")
+
     if vault.metadata.time_lock and not is_after_block(vault.metadata.time_lock, broadcast_tx):
         raise Exception("Time-lock not yet satisfied")
     
