@@ -149,20 +149,22 @@ No binding or finalization occurs yet.
 
 The protocol generates a **PSBT** for the user:
 
-- A self-spend (no 2% skim enforced at protocol level)
-- Fee amount is either randomized or specified by the PoA conditions
+- A Bitcoin transaction that either sends funds:
+  - back to the sender (a self-spend), or
+  - to a specific `recipient_wallet` address
+- The fee is specified by the `fee_requirement` field in the vault metadata
 
 The user signs and broadcasts this transaction from the **wallet that will own the vault**.
 
 Once the transaction is confirmed:
 
 - Its TXID is recorded in the vault metadata
-- The vault is now **cryptographically bound** to the signing wallet
+- The vault is now **cryptographically bound** to the transaction and the signing wallet
 
-> ⚠️ LOCK vaults must only be finalized once the binding transaction is confirmed in a Bitcoin block and is not replaceable (RBF-disabled).
-RBF-enabled transactions can be evicted from the mempool or replaced before confirmation, weakening the vault’s guarantee of finality and tamper resistance.
-Clients must enforce this to avoid transaction eviction or rebinding hijacks. The vault_id must only be derived once the TX is final.
-> 
+> ⚠️ LOCK vaults must only be finalized once the binding transaction is confirmed in a Bitcoin block and is not replaceable (RBF-disabled).  
+> RBF-enabled transactions can be evicted from the mempool or replaced before confirmation, weakening the vault’s guarantee of finality and tamper resistance.  
+> Clients must enforce this to avoid transaction eviction or rebinding hijacks.  
+> The `vault_id` must only be derived once the TX is final.
 
 ### **Step 3: Finalization**
 
@@ -266,15 +268,21 @@ This typically involves:\n
 
 </aside>
 
-### 📤 Self-Spend as the Default Unlock Transaction
+### 📤 Spend-to-Trigger: Self or External
 
-LOCK vaults are typically unsealed by a **self-spend** — a Bitcoin transaction that pays only the miner fee and sends funds back to the same wallet. This ensures:
+LOCK vaults are unlocked by real Bitcoin transactions that meet all Proof-of-Access conditions. These include:
 
-- No third party is paid
-- No value leaves the user’s custody
-- The only “cost” is energy (the fee), which acts as a proof-of-work ticket
+- A **self-spend** (sending funds back to your own wallet)
+- A **payment to a specific recipient** (`recipient_wallet`)
+- A **public unlock** from any wallet (if `authorized_wallet = "ANY"`)
 
-Self-spends become the **default PoA trigger** — minimal, auditable, and sovereign.
+These transaction patterns allow LOCK vaults to enforce access via:
+
+- Energy expenditure (through miner fees)
+- Ownership (proven via signatures)
+- Optional payment (to a designated wallet)
+
+> Self-spend remains the **default PoA trigger** — minimal, auditable, and sovereign.
 
 ### ⏱ Time-Locks via Block Height
 
