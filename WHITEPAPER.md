@@ -513,13 +513,24 @@ Recommended mitigations include:
 
 <aside>
 
-**Key Derivation & Recovery Note**
+### 🔑 Key Derivation & Recovery Note
 
-By default, clients should derive the metadata encryption key using a secure key agreement tied to the bound wallet — e.g., `HKDF(key = wallet_pubkey || SEAL hash)`.
+By default, clients should derive the **metadata encryption key** using a secure key agreement tied to the bound wallet — for example:
 
-Recovery strategies depend on whether the metadata is re-encryptable or if delegation/rebinding is allowed.
+```
+scss
+CopyEdit
+HKDF(key = wallet_pubkey || SEAL_hash)
+```
 
-LOCK does not mandate how encryption keys are generated or stored — only that metadata must be encrypted prior to binding. Implementations should define a secure, consistent derivation path.
+Recovery strategies depend on:
+
+- Whether the metadata is **re-encryptable**
+- Whether **delegation** or **rebinding** is allowed
+
+LOCK does **not mandate** how encryption keys are generated or stored — only that **metadata must be encrypted prior to binding**.
+
+Implementations should define a secure, consistent **derivation path** tailored to their security model.
 
 </aside>
 
