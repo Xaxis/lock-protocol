@@ -20,7 +20,9 @@ To be LOCK-compliant, a client **must**:
  
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
-  - Verify that the transaction is signed by the `authorized_wallet`
+  - Match `authorized_wallet` to the TX input signer:
+    - If `authorized_wallet` is a list: require one signer to match
+    - If `authorized_wallet` is a string: require signer to match the address exactly
   - Verify that `recipient_wallet` is satisfied:
     - `"self"` → funds return to sender wallet
     - a string → funds sent to that address
