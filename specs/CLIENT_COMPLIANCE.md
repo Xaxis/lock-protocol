@@ -18,6 +18,11 @@ To be LOCK-compliant, a client **must**:
   - `unseal()` – verifies PoA and decrypts SEAL
   - `rebind()` – securely transfers ownership with old signature
  
+- Before decrypting metadata:
+  - Prompt user to sign a challenge using their wallet
+  - Use the resulting pubkey to derive metadata_key
+  - Allow decryption only if pubkey matches `authorized_wallet`
+ 
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
   - Match `authorized_wallet` to the TX input signer:
