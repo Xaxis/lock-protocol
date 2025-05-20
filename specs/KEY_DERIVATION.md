@@ -35,7 +35,7 @@ metadata_key = HKDF-SHA256(
 
 | Field | Description |
 |-------|-------------|
-| `vault_creator_pubkey` | The public key of the vault creator, used in the binding TX |
+| `vault_creator_pubkey` | Public key from the signing input of the binding transaction (vault creator) |
 | `seal_hash` | SHA-256 hash of the SEAL file (32 bytes) |
 | `salt` | Fixed string: `"LOCK-METADATA"` (used for domain separation) |
 | `info` | Fixed string: `"metadata-encryption-v1"` (for versioning) |
@@ -111,6 +111,8 @@ This signature is used to:
 - Then derive the metadata encryption key using HKDF
 
 Only then can the vault metadata be decrypted.
+
+(The client may allow wallet selection or attempt to match the pubkey automatically after signing.)
 
 ---
 
