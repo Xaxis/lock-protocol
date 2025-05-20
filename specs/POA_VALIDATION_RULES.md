@@ -20,16 +20,19 @@ Every `unseal()` attempt **must** validate the following:
 
 ### 2. **Authorized Wallet Match**
 
-- The unlocking transaction **must be signed by the wallet address specified in the `authorized_wallet` field of the decrypted vault metadata.**
+- If `authorized_wallet = "ANY"`:
+  - Skip this check
+- If `authorized_wallet` is a list:
+  - At least one input must be signed by a wallet in the list
+- If `authorized_wallet` is a string:
+  - At least one input must be signed by that address
 - Clients must:
   - Extract the signing public key from the transaction input (scriptSig or witness)
   - Derive the corresponding address using the correct Bitcoin network
   - Compare the result to `authorized_wallet`
-- If `authorized_wallet = "ANY"`:
-  - Skip this check
 - ⚠️ Do **not** validate against the wallet that signed the original `bind()` transaction — this is not always the same as `authorized_wallet`.
 
-This ensures only the explicitly authorized wallet can unseal the vault, not just the one that created it.
+This ensures only (one of) the explicitly authorized wallet(s) can unseal the vault, not just the one that created it.
 
 ### 3. **Recipient Wallet Match**
 - If `recipient_wallet` is set:
