@@ -39,6 +39,7 @@ To be LOCK-compliant, a client **must**:
   - Use consistent SEAL hashing and ID generation
 
 - Track unlock limits securely:
+  - Multiple wallet addresses can be authorized to unlock a vault. Clients must support `authorized_wallet` as a list or a single string. List order should be normalized (e.g. sorted) for deterministic hashing.
   - Store unlock count persistently
   - Warn on conflicts or ambiguity
   - Optionally support `.unlocklog.json` audit trails
