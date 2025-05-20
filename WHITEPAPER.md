@@ -487,7 +487,7 @@ Vault metadata defines the PoA conditions. It is structured before sealing and i
 
 | Field | Description |
 | --- | --- |
-| `authorized_wallet` | The wallet address that must sign the unlock transaction (or `ANY` to allow public unlocks) |
+| `authorized_wallet` | A single wallet address (string) or list of addresses that may sign the unlock transaction. Use `"ANY"` to allow public unlocks. |
 | `amount_condition` | The required Bitcoin amount to be spent in the unlock transaction. Can be fixed or a randomized range |
 | `time_lock` | Optional minimum block height required before unsealing |
 | `unlock_limit` | Optional number of allowed unseals (1-time, N-time, infinite) |
@@ -582,9 +582,16 @@ Defines a vault's unlock logic, then encrypts it.
 ```python
 python
 CopyEdit
-def create_metadata(wallet, amount_condition, recipient_wallet="self", time_lock=None, unlock_limit=None, visibility="encrypted"):
+def create_metadata(
+    authorized_wallet,                   # string, "ANY", or list of addresses
+    amount_condition,                   # dict with "type" and "amount"/"min"/"max"
+    recipient_wallet="self",            # optional; "self" is default
+    time_lock=None,                     # optional block height
+    unlock_limit=None,                  # optional max unseals
+    visibility="encrypted"              # "encrypted" (default) or "plaintext"
+):
     metadata = {
-        "authorized_wallet": wallet,
+        "authorized_wallet": authorized_wallet,    # string, "ANY", or list
         "amount_condition": amount_condition,
         "recipient_wallet": recipient_wallet,
         "time_lock": time_lock,
