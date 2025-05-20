@@ -6,7 +6,14 @@ flowchart TD
     E --> F["Record TXID in metadata"]
     F --> G["Generate vault_id = hash(SEAL + metadata + TXID)"]
     G --> H["Vault is finalized"]
-    H --> I["User attempts to unseal"]
-    I --> J{"Valid PoA TX?"}
-    J -- Yes --> K["Decrypt SEAL"]
-    J -- No --> L["Reject attempt"]
+    H --> I["User imports SEAL"]
+    I --> J["Client detects encrypted metadata"]
+    J --> K["Prompt user to sign challenge with wallet"]
+    K --> L{"Signature valid & authorized?"}
+    L -- Yes --> M["Derive key and decrypt metadata"]
+    M --> N["Show unlock conditions to user"]
+    N --> O["Generate unlock PSBT"]
+    O --> P["User signs & broadcasts unlock TX"]
+    P --> Q{"Valid PoA TX?"}
+    Q -- Yes --> R["Decrypt SEAL"]
+    Q -- No --> S["Reject attempt"]
