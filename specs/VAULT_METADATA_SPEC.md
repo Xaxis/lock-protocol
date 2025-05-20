@@ -10,7 +10,7 @@ Vault metadata defines how a sealed vault can be unlocked under the LOCK protoco
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `authorized_wallet` | string | Wallet address that must sign the unlock TX (`"ANY"` = public access) |
+| `authorized_wallet` | string or list | One wallet address or list of addresses that may sign the unlock TX. `"ANY"` = public access |
 | `amount_condition` | object | Required satoshi amount to be spent in the unlock TX. Type can be `fixed` or `range`. Clients may optionally choose a random value within the range. |
 | recipient_wallet | string (optional) | Where the unlock transaction must send amount. "self" = send back to sender. If omitted, defaults to "self" |
 | `txid` | string | Set during `bind()` — TX that anchors ownership |
@@ -110,5 +110,22 @@ For detailed specifications and implementation guidance, refer to [KEY_DERIVATIO
   "version": 1
 }
 ```
+
+## 🔁 Example (Before Encryption — Multiple Authorized Wallets that can unseal)
+
+```json
+{
+  "authorized_wallet": [
+    "bc1qxyz...",
+    "bc1qabc...",
+    "bc1qdef..."
+  ],
+  "recipient_wallet": "self",
+  "amount_condition": { "type": "fixed", "amount": 10000 },
+  "time_lock": 850000,
+  "unlock_limit": 1,
+  "visibility": "encrypted",
+  "version": 1
+}
 
 MIT — fork or extend.
