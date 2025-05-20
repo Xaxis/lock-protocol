@@ -97,6 +97,23 @@ Vaults with `visibility = plaintext` skip this step and store metadata unencrypt
 
 ---
 
+## ✍️ Sign-to-Decrypt Flow
+
+Clients must prompt the user to sign a challenge (e.g., the vault_id) using an external wallet.
+
+This signature is used to:
+
+- Extract the pubkey of the signer
+- Match that pubkey against `authorized_wallet`
+  - If `authorized_wallet` is a list, match must occur within the list
+  - If it's a string, match must equal that address
+- Use the pubkey to derive shared secret via ECDH
+- Then derive the metadata encryption key using HKDF
+
+Only then can the vault metadata be decrypted.
+
+---
+
 ## ✅ Compliance
 
 Clients **must follow this derivation scheme** to be LOCK-compliant.  
