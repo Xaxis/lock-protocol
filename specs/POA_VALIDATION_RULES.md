@@ -30,7 +30,7 @@ Every `unseal()` attempt **must** validate the following:
   - Extract the signing public key from the transaction input (scriptSig or witness)
   - Derive the corresponding address using the correct Bitcoin network
   - Compare the result to `authorized_wallet`
-- ⚠️ Do **not** validate against the wallet that signed the original `bind()` transaction — this is not always the same as `authorized_wallet`.
+- ⚠️ Do **not** validate against the wallet that signed the original `bind()` transaction — this is not always the same as ``.
 
 This ensures only (one of) the explicitly authorized wallet(s) can unseal the vault, not just the one that created it.
 
@@ -54,7 +54,7 @@ This ensures only (one of) the explicitly authorized wallet(s) can unseal the va
 - If `recipient_wallet` is:
   - `"self"` (or omitted): at least one output must return funds to the sender’s wallet
   - a specific address: at least one output must pay that address
-- `"ANY"` is not a valid `recipient_wallet` — use `"authorized_wallet": "ANY"` and `"recipient_wallet": "self"` for public vaults
+- `"ANY"` is not a valid `recipient_wallet` — use `"": "ANY"` and `"recipient_wallet": "self"` for public vaults
 
 ### 6. **Block Height (Time Lock)**
 - If `time_lock` is present:
@@ -89,8 +89,13 @@ Reject unlock if:
 if not is_confirmed(tx) or tx.replaceable:
     raise Error("TX not confirmed or replaceable")
 
-if vault.authorized_wallet != "ANY" and not tx_from_authorized_wallet(tx, vault.metadata.authorized_wallet):
-    raise Error("Unauthorized wallet")
+if vault.authorized_wallet != "ANY":
+    if isinstance(vault.authorized_wallet, list):
+        if not any(tx_from_wallet(tx, addr) for addr in vault.authorized_wallet):
+            raise Error("No authorized wallet signed the transaction")
+    else:
+        if not tx_from_wallet(tx, vault.authorized_wallet):
+            raise Error("Unauthorized wallet")
 
 if not recipient_matches(tx, vault.recipient_wallet or "self"):
     raise Error("Recipient wallet mismatch")
