@@ -515,11 +515,15 @@ Clients should estimate and include a suitable miner fee based on mempool condit
 
 All metadata is encrypted by default using symmetric encryption (e.g. AES-256-GCM or ChaCha20-Poly1305), with a key known only to the vault creator.
 
-The encryption key is derived via an ECDH + HKDF scheme:
+To decrypt metadata, the user must sign a client-defined challenge using a wallet in `authorized_wallet`. This proves control and enables shared secret derivation.
 
-`shared_secret = ECDH(my_private_key, peer_pubkey)`
-
-`metadata_key = HKDF(shared_secret || seal_hash)`
+The client must:
+- Extract the signing pubkey from the signature
+- Match it against the `authorized_wallet` list or string
+- Use it to compute the ECDH shared secret:
+  `shared_secret = ECDH(my_private_key, signer_pubkey)`
+- Derive metadata key:
+  `metadata_key = HKDF(shared_secret || seal_hash)`
 
 See `KEY_DERIVATION.md` for full implementation details.
 
