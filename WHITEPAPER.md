@@ -248,7 +248,7 @@ To unseal a vault, a user submits a Bitcoin transaction. The PoA engine performs
 
 | Condition | Purpose |
 | --- | --- |
-| **Origin Address Match*** | Ensures the transaction is signed by the bound wallet |
+| **Authorized Wallet Match** | Ensures at least one input is signed by a wallet listed in the `authorized_wallet` field (or skip if `"ANY"`) |
 | **Amount Condition Match** | Verifies the total amount spent in the transaction matches the required amount/range |
 | **Recipient Match** | Confirms the BTC was sent to the required wallet (self or third party) |
 | **Time-lock Match** | Confirms block height is at or beyond minimum required height |
@@ -259,8 +259,12 @@ If all conditions are met, **the SEAL is decrypted and the user gains access**. 
 
 <aside>
 
-***”Origin Address Match**” **Note**
-`tx_from_bound_wallet()` must cryptographically verify that one of the transaction’s inputs was signed by the private key controlling the `authorized_wallet`.
+> **Authorized Wallet Match**  
+> The transaction must be signed by one of the addresses in the `authorized_wallet` field of the vault metadata.
+> Clients must:
+> - Extract the public key from `scriptSig` or `witness`
+> - Derive the address using correct network rules
+> - Compare to each entry in the list (or skip if `authorized_wallet = "ANY"`)
 This typically involves:\n
 - “Extracting the public key from `scriptSig` (P2PKH) or `witness` (P2WPKH, Taproot)\n”
 - ”Deriving the address from that public key\n”
@@ -428,8 +432,13 @@ Validates whether a submitted transaction satisfies the vault’s PoA conditions
 ```python
 def unseal(vault, broadcast_tx):
 # Verify transaction is signed by authorized wallet, not just bound txid
-    if not tx_from_authorized_wallet(broadcast_tx, vault.metadata.authorized_wallet):
-        raise Exception("Wallet mismatch")
+    auth = vault.metadata.authorized_wallet
+    if isinstance(auth, list):
+    if not any(tx_from_authorized_wallet(broadcast_tx, addr) for addr in auth):
+        raise Exception("No authorized wallet matched")
+    elif auth != "ANY":
+    if not tx_from_authorized_wallet(broadcast_tx, auth):
+        raise Exception("Unauthorized wallet")
     
     if not amount_matches(vault.metadata.amount_condition, broadcast_tx):
     raise Exception("Amount condition not satisfied")
@@ -672,6 +681,8 @@ Common use cases:
 A vault that can be unsealed by a third-party wallet, defined at sealing time.
 
 - `authorized_wallet = different from sealing wallet`
+    - You can authorize multiple wallets to unseal the same vault
+    - Example: `"authorized_wallet": ["bc1qxyz...", "bc1qabc..."]`
 - SEAL may be public or encrypted
 - Can be used to:
     - Give controlled access to partners, clients, successors
