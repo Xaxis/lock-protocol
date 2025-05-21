@@ -50,7 +50,7 @@ This repository contains the full LOCK protocol specification, including:
 
 | File | Description |
 |------|-------------|
-| `LOCK Verifiable Access Through Proof-of-Work-V1.1.md` | 📘 Full protocol whitepaper |
+| `WHITEPAPER.md` | 📘 Full protocol whitepaper |
 | `SEAL_FORMAT_SPEC.md` | 📦 Encrypted payload file format |
 | `VAULT_METADATA_SPEC.md` | 🧾 Metadata schema and visibility rules |
 | `POA_VALIDATION_RULES.md` | 🔐 Unlock transaction checks |
