@@ -40,7 +40,7 @@ A new access layer that is:
 - Verifiable anywhere
 - Secured by Bitcoin
 
-LOCK doesn’t rely on who you are. It relies on what you’ve done — on-chain.
+LOCK doesn't rely on who you are. It relies on what you've done — on-chain.
 
 ---
 
@@ -101,3 +101,7 @@ Fork it, implement it, or extend it freely.
 📘 [Read the Whitepaper](./WHITEPAPER.md)  
 💬 Community, clients, and contributions welcome.
 
+## 👥 Follow For Updates
+
+- **GitHub**: [Contribute](https://github.com/bramkanstein/lock-protocol/)
+- **Twitter**: [Follow @bramk](https://x.com/bramk)
