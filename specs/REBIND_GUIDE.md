@@ -78,6 +78,19 @@ It must be:
 - Signed by the old wallet  
 - Bound to a new on-chain transaction
 
+## 💰 Amount Conditions During Rebinding
+
+When rebinding a vault, the amount conditions must be preserved:
+
+- For fixed amounts: The same amount requirement is maintained
+- For range amounts: The range parameters (min/max) are preserved, but a new random amount is selected during the rebinding PSBT generation
+- The selected amount from the original binding is not carried over to the rebinding
+
+This ensures that:
+1. The security properties of the amount condition are maintained
+2. Each rebinding creates a new, independent amount requirement
+3. The range parameters remain consistent with the vault's original configuration
+
 ---
 
 ## 💬 Example Flow (Client Perspective)
