@@ -3,8 +3,8 @@
 <aside>
 
 **Published by:** Bram Kanstein ([https://x.com/bramk](https://x.com/bramk))  
-**Version:** 1.0  
-**Published:** May 18, 2025
+**Version:** 1.1  
+**Published:** May 21, 2025
 
 </aside>
 
@@ -152,7 +152,13 @@ The protocol generates a **PSBT** for the user:
 - A Bitcoin transaction that either sends funds:
   - back to the sender (a self-spend), or
   - to a specific `recipient_wallet` address
-- The amount is specified by the `amount_condition` field in the vault metadata (Can be fixed or a randomized range)
+- The amount is determined by the `amount_condition` field in the vault metadata:
+  - For `fixed` type: uses the exact amount specified
+  - For `range` type: 
+    1. Client randomly selects an amount between `min` and `max`
+    2. This selected amount becomes the fixed target for on-chain validation
+    3. The selected amount must be stored with the PSBT for validation
+- Network fees are separate from the amount condition and must be added to the total cost
 
 The user signs and broadcasts this transaction from the **wallet that will own the vault**.
 
@@ -249,7 +255,7 @@ To unseal a vault, a user submits a Bitcoin transaction. The PoA engine performs
 | Condition | Purpose |
 | --- | --- |
 | **Authorized Wallet Match** | Ensures at least one input is signed by a wallet listed in the `authorized_wallet` field (or skip if `"ANY"`) |
-| **Amount Condition Match** | Verifies the total amount spent in the transaction matches the required amount/range |
+| **Amount Condition Match** | Verifies the total amount spent in the transaction matches the required amount. For range conditions: validates against the specific amount selected during PSBT generation |
 | **Recipient Match** | Confirms the BTC was sent to the required wallet (self or third party) |
 | **Time-lock Match** | Confirms block height is at or beyond minimum required height |
 | **Unlock Count Match** | Ensures the vault hasn’t been unsealed too many times (if limited) |
@@ -259,16 +265,20 @@ If all conditions are met, **the SEAL is decrypted and the user gains access**. 
 
 <aside>
 
-> **Authorized Wallet Match**  
-> The transaction must be signed by one of the addresses in the `authorized_wallet` field of the vault metadata.
-> Clients must:
-> - Extract the public key from `scriptSig` or `witness`
-> - Derive the address using correct network rules
-> - Compare to each entry in the list (or skip if `authorized_wallet = "ANY"`)
-This typically involves:\n
-- “Extracting the public key from `scriptSig` (P2PKH) or `witness` (P2WPKH, Taproot)\n”
-- ”Deriving the address from that public key\n”
-- ”Comparing it to the `authorized_wallet` field in the vault metadata\n Clients must reject any unlock TX that fails this ownership check.”
+### Authorized Wallet Match
+
+The transaction must be signed by one of the addresses in the `authorized_wallet` field of the vault metadata.
+
+Clients must:
+1. Extract the public key from:
+   - `scriptSig` (for P2PKH transactions)
+   - `witness` (for P2WPKH and Taproot transactions)
+2. Derive the address using correct network rules
+3. Compare to each entry in the `authorized_wallet` list
+   - Skip this check if `authorized_wallet = "ANY"`
+   - Reject any unlock transaction that fails this ownership check
+
+This validation ensures that only the intended wallet(s) can unseal the vault.
 
 </aside>
 
