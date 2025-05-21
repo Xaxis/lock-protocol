@@ -81,6 +81,7 @@ This field is unencrypted and for **client UI only**. It must be length-prefixed
 - No wallet bindings
 - No PoA logic
 - No signature material
+- No PSBT information (including selected amounts for range conditions)
 
 Those live in the **vault metadata**, encrypted separately.
 
@@ -103,10 +104,6 @@ Examples in: `unseal-client`, `specs/examples/`
 
 ---
 
-## License
-
-MIT — spec evolves under versioning.
-
 ## 🧮 Vault ID Canonicalization
 
 All clients must compute the `vault_id` using the following format:
@@ -122,3 +119,7 @@ Where:
 - `txid_bytes` = 32-byte little-endian binding transaction ID  
 
 This format must be strictly followed to ensure vault compatibility across clients.
+
+## License
+
+MIT — feel free to fork, improve, or adapt for other LOCK-compatible clients.
