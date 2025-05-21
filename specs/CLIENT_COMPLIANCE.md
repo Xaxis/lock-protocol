@@ -18,23 +18,23 @@ To be LOCK-compliant, a client **must**:
   - `unseal()` – verifies PoA and decrypts SEAL
   - `rebind()` – securely transfers ownership with old signature
  
-- Before decrypting metadata:
-  - Prompt user to sign a challenge using their wallet
-  - Use the resulting pubkey to derive metadata_key
-  - Allow decryption only if pubkey matches `authorized_wallet`
- 
 - Enforce all Proof-of-Access (PoA) conditions:
   - Confirm transaction is on-chain and **non-replaceable** (not RBF)
-  - Match `authorized_wallet` to the TX input signer:
-    - If `authorized_wallet` is a list: require one signer to match
-    - If `authorized_wallet` is a string: require signer to match the address exactly
+  - Verify that the transaction is signed by the `authorized_wallet`
   - Verify that `recipient_wallet` is satisfied:
     - `"self"` → funds return to sender wallet
     - a string → funds sent to that address
     - omitted → defaults to `"self"`
-  - Verify `amount_condition` (fixed or range):
-    - Total spent amount must match the condition
-    - Calculate: `inputs - change_outputs`
+  - Verify `amount_condition` in two phases:
+    1. PSBT Generation Phase:
+       - For `fixed` type: use exact amount specified
+       - For `range` type: randomly select amount between `min` and `max`
+       - Store selected amount with PSBT for validation
+    2. On-Chain Validation Phase:
+       - For `fixed` type: validate against exact amount
+       - For `range` type: validate against the specific amount selected during PSBT generation
+       - Calculate: `inputs - change_outputs = amount_spent`
+       - Network fees are separate and not part of this calculation
   - Verify block height is `>= time_lock`, if set
   - Reject if unlock limit is exceeded
   - Decrypt SEAL and validate encryption tag (AES-GCM, Poly1305, etc.)
@@ -44,7 +44,6 @@ To be LOCK-compliant, a client **must**:
   - Use consistent SEAL hashing and ID generation
 
 - Track unlock limits securely:
-  - Multiple wallet addresses can be authorized to unlock a vault. Clients must support `authorized_wallet` as a list or a single string. List order should be normalized (e.g. sorted) for deterministic hashing.
   - Store unlock count persistently
   - Warn on conflicts or ambiguity
   - Optionally support `.unlocklog.json` audit trails
@@ -92,17 +91,13 @@ These are optional, as long as core PoA behavior is preserved.
 ## 🔒 Compliance = Validation
 
 LOCK compliance means:
-- You don’t store private keys
-- You don’t fake unlocks
+- You don't store private keys
+- You don't fake unlocks
 - You verify all access via Bitcoin TX
 
-LOCK is a validation protocol. If you skip the checks, you’re not part of it.
+LOCK is a validation protocol. If you skip the checks, you're not part of it.
 
 ---
-
-## License
-
-Licensed under MIT. Compliance requires strict PoA enforcement.
 
 ## 🧮 Vault ID Canonicalization
 
@@ -113,9 +108,54 @@ vault_id = SHA-256(SEAL_bytes || metadata_bytes || txid_bytes)
 ```
 
 Where:
-
 - `SEAL_bytes` = full binary contents of the `.seal` file  
 - `metadata_bytes` = encrypted metadata, encoded using a canonical format (CBOR or sorted UTF-8 JSON)  
 - `txid_bytes` = 32-byte little-endian binding transaction ID  
 
+For range-based amount conditions, the selected amount must be stored with the PSBT but is not part of the vault_id calculation.
+
 This format must be strictly followed to ensure vault compatibility across clients.
+
+### Amount Validation Process
+
+Clients must implement a two-phase amount validation process:
+
+1. **PSBT Generation**
+   ```python
+   def generate_psbt_amount(amount_condition):
+       if amount_condition.type == "fixed":
+           return amount_condition.amount
+       elif amount_condition.type == "range":
+           # Randomly select amount within range
+           selected = random.randint(amount_condition.min, amount_condition.max)
+           return selected
+   ```
+
+2. **On-Chain Validation**
+   ```python
+   def validate_amount(tx, amount_condition, selected_amount):
+       amount_spent = sum(tx.inputs) - sum(tx.change_outputs)
+       if amount_condition.type == "fixed":
+           return amount_spent == amount_condition.amount
+       elif amount_condition.type == "range":
+           return amount_spent == selected_amount
+   ```
+
+3. **Error Handling**
+   ```python
+   def handle_amount_error(expected, actual):
+       raise ValidationError(
+           code="INVALID_AMOUNT",
+           message="Transaction amount does not match required amount",
+           details={
+               "expected": expected,
+               "actual": actual,
+               "type": "fixed" if isinstance(expected, int) else "range"
+           }
+       )
+   ```
+
+---
+## License
+
+Licensed under MIT. Compliance requires strict PoA enforcement.
