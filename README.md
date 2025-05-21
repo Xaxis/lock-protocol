@@ -86,7 +86,7 @@ See `CLIENT_COMPLIANCE.md` for full requirements.
 Got a question about the LOCK Protocol?  
 Curious about how vaults, PoA, SEALs, or rebinding work?
 
-🧠 [**Talk to the LOCK Protocol GPT Assistant**](https://chat.openai.com/g/g-Wp6a2quRl-lock-protocol-assistant-ask-me-anything)  
+🧠 [**Talk to the LOCK Protocol GPT Assistant**](https://chatgpt.com/g/g-6829c4182c5c819188aaa5dcee9d9550-lock-protocol-assistant-ask-me-anything) 
 The official AI companion for developers, builders, and researchers.
 
 - Explains the protocol in plain or technical terms
