@@ -20,7 +20,8 @@ LOCK turns access control into an act of energy:
 - Unlock conditions are defined in encrypted **metadata**
 - A **Bitcoin transaction** that meets those conditions is the **only way** to decrypt
 
-There are no accounts. No identities. No passwords to reset. No servers. No On-chain data storage. Just proof.
+**There are no accounts. No identities. No passwords to reset. No servers. No On-chain data storage. Just proof.**
+
 ---
 
 ## 🧠 What LOCK Introduces
