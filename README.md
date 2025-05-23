@@ -107,8 +107,7 @@ The official AI companion for developers, builders, and researchers.
 
 ## 📜 License
 
-MIT — permissionless and open by design.  
-Fork it, implement it, or extend it freely.
+MIT — permissionless and open by design. 
 
 ---
 
