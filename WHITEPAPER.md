@@ -422,7 +422,7 @@ Binds a draft vault to a specific Bitcoin wallet by anchoring it to a signed tra
 
 ```python
 def bind(draft_vault, signed_tx):
-    assert validate_transaction(signed_tx)
+    assert validate_transaction(signed_tx)  # Must ensure tx is confirmed and non-replaceable (RBF disabled)
     txid = extract_txid(signed_tx)
 
     draft_vault.txid = txid  # Bind vault to TXID
@@ -458,7 +458,7 @@ def unseal(vault, broadcast_tx):
 
     if vault.metadata.time_lock and not is_after_block(vault.metadata.time_lock, broadcast_tx):
         raise Exception("Time-lock not yet satisfied")
-    
+     # > **Note on `amount_matches` for Range Conditions:** The `amount_matches` function must handle `amount_condition` of type `range` by validating against the *specific amount selected during the PSBT generation phase*. It should not simply check if the transaction amount falls within the defined range. For detailed logic, refer to the `validate_amount(tx, amount_condition, selected_amount)` pseudocode in `specs/CLIENT_COMPLIANCE.md`.
     if vault.metadata.unlock_limit:
         if get_unlock_count(vault.id) >= vault.metadata.unlock_limit:
             raise Exception("Unlock limit exceeded")
