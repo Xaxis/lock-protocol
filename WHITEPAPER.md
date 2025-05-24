@@ -102,7 +102,7 @@ flowchart TD
     C --> D["Generate PSBT for binding"]
     D --> E["User signs & broadcasts TX"]
     E --> F["Record TXID in metadata"]
-    F --> G["Generate vault_id = hash(SEAL + metadata + TXID)"]
+    F --> G["Generate vault_id = SHA-256(SEAL + metadata + TXID)"]
     G --> H["Vault is finalized"]
     H --> I["User attempts to unseal"]
     I --> J{"Valid PoA TX?"}
@@ -428,7 +428,7 @@ def bind(draft_vault, signed_tx):
     draft_vault.txid = txid  # Bind vault to TXID
 
     # Compute canonical vault_id as SHA-256(SEAL || metadata || TXID)
-    vault_id = sha256(draft_vault.seal + draft_vault.metadata + txid)
+    vault_id = SHA-256(draft_vault.seal + draft_vault.metadata + txid)
 
     draft_vault.id = vault_id
 
@@ -477,7 +477,7 @@ def rebind(vault, new_tx, old_wallet_signature):
     
     new_txid = extract_txid(new_tx)
     vault.txid = new_txid
-    vault.id = hash(vault.seal + vault.metadata + new_txid)
+    vault.id = SHA-256(vault.seal + vault.metadata + new_txid)
     
     return updated_vault(vault)
 ```
