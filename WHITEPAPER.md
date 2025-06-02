@@ -527,6 +527,13 @@ All metadata is encrypted by default using symmetric encryption (e.g. AES-256-GC
 
 To decrypt metadata, the user must sign a client-defined challenge using a wallet in `authorized_wallet`. This proves control and enables shared secret derivation.
 
+SEAL and metadata decryption keys are derived as follows:
+
+shared_secret = ECDH(creator_pubkey, unlocker_pubkey)  
+symmetric_key = HKDF(shared_secret || seal_hash)
+
+The transaction is not used in this computation — enabling SEALs to be sealed before any transaction exists.
+
 The client must:
 - Extract the signing pubkey from the signature
 - Match it against the `authorized_wallet` list or string
@@ -534,6 +541,8 @@ The client must:
   `shared_secret = ECDH(my_private_key, signer_pubkey)`
 - Derive metadata key:
   `metadata_key = HKDF(shared_secret || seal_hash)`
+
+Note: The confirmed Bitcoin transaction that satisfies PoA rules is not used as input to the cryptographic key derivation. The decryption key is derived purely from ECDH between the vault creator and unlocker wallet, combined with the SEAL hash via HKDF. This preserves sealing flexibility and decouples publishing from blockchain timing.
 
 See `KEY_DERIVATION.md` for full implementation details.
 
@@ -1002,6 +1011,8 @@ LOCK does **not** handle:
 - Expiration timers or local deletion policies
 
 These must be handled by clients that implement LOCK.
+
+Trust Assumption: PoA enforcement is performed by the LOCK client. A modified client could bypass transaction validation and still derive the decryption key if the user controls an authorized wallet (in posession of the private key). This is a conscious design decision — prioritizing user sovereignty over coercive enforcement. It does not compromise encryption or identity privacy.
 
 ### Summary
 
