@@ -97,6 +97,20 @@ A `.seal` file:
 
 ---
 
+## 🔑 Key Derivation (Clarification)
+
+Decryption of the SEAL requires a symmetric key derived using:
+  
+  shared_secret = ECDH(creator_pubkey, unlocker_pubkey)
+  symmetric_key = HKDF(shared_secret || seal_hash)
+
+- `seal_hash` is the SHA-256 hash of the full `.seal` file contents
+- No Bitcoin transaction or transaction ID is used in the derivation
+
+This design allows the SEAL to be created and encrypted **before** any Bitcoin transaction exists. PoA validation still governs *when* and *by whom* the SEAL can be decrypted, but the symmetric key is computed independently from transaction data.
+
+---
+
 ## ✅ Reference Implementation
 
 See: `Vault::decrypt()`, `SEALParser::read()`  
