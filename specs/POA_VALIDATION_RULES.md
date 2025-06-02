@@ -6,6 +6,10 @@ This document defines the required validation logic for any client performing a 
 
 PoA is the core of the LOCK access model: a Bitcoin transaction must meet vault-defined constraints before access is granted.
 
+🧾 Clarification
+
+The Proof-of-Access (PoA) transaction is used to verify compliance with vault conditions (wallet, amount, recipient, time-lock). However, this transaction is not cryptographically tied to the decryption key. It is a signal used by clients to decide whether to permit decryption.
+
 ---
 
 ## 🔐 Core Validation Steps
