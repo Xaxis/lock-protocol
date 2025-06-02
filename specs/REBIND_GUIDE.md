@@ -5,6 +5,10 @@
 Rebinding is the act of transferring access to a sealed vault from one Bitcoin wallet to another.  
 This is a **core feature** of the LOCK protocol and is enforced via a cryptographically signed Bitcoin transaction.
 
+📎 Vault Rebinding Note
+
+Vault rebinding alters the vault’s metadata and PoA verification conditions but does not change the cryptographic key used to encrypt or decrypt the SEAL. The SEAL remains accessible to any authorized wallet per the original ECDH key derivation.
+
 ---
 
 ## 🔁 What Rebinding Does
