@@ -180,7 +180,7 @@ amount_condition = {
 
 ## ❌ Reject Conditions
 
-Reject unlock if:
+⚠️ Reject unlock if:
 - Transaction is unconfirmed or replaceable (RBF)
 - Wallet mismatch
 - Amount mismatch
