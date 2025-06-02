@@ -43,6 +43,18 @@ metadata_key = HKDF-SHA256(
 
 ---
 
+## 🔐 Key Derivation Scope
+
+The symmetric key used to decrypt the metadata or SEAL is derived from:
+
+shared_secret = ECDH(creator_pubkey, unlocker_pubkey)
+
+symmetric_key = HKDF(shared_secret || seal_hash)
+
+Importantly, this key derivation does not include the PoA transaction or its TXID. This design enables vaults to be sealed and published before any Bitcoin transaction has been submitted.
+
+---
+
 ## 🛠️ Inputs
 
 ### 1. **ECDH Shared Secret**
