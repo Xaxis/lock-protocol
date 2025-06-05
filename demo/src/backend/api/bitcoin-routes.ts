@@ -17,8 +17,8 @@ import {
   GetWalletInfoRequest,
   GetWalletInfoResponse,
   ApiResponse
-} from '../../shared/types/api';
-import { HTTP_STATUS, ERROR_CODES } from '../../shared/constants/protocol';
+} from '@shared/types/api';
+import { HTTP_STATUS, ERROR_CODES } from '@shared/constants/protocol';
 
 export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
   const router = Router();
@@ -65,7 +65,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error generating PSBT:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -103,7 +103,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
         errors: validation.errors,
         proof_of_access: {
           transaction,
-          vault: null, // Would be populated with actual vault
+          vault: {} as any, // Would be populated with actual vault
           valid: validation.valid,
           errors: validation.errors,
           timestamp: Date.now()
@@ -120,7 +120,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error validating transaction:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -162,7 +162,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error getting transaction status:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -202,7 +202,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error broadcasting transaction:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -244,7 +244,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error getting wallet info:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -273,7 +273,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error getting fee estimates:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -302,7 +302,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error getting network info:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -345,7 +345,7 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
       console.error('Error validating address:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }

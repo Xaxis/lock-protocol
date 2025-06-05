@@ -21,8 +21,8 @@ import {
   GetVaultRequest,
   GetVaultResponse,
   ApiResponse
-} from '../../shared/types/api';
-import { HTTP_STATUS, ERROR_CODES } from '../../shared/constants/protocol';
+} from '@shared/types/api';
+import { HTTP_STATUS, ERROR_CODES } from '@shared/constants/protocol';
 
 // Configure multer for file uploads
 const upload = multer({
@@ -57,10 +57,13 @@ export function createVaultRoutes(
       // Parse metadata from request body
       const metadata = JSON.parse(req.body.metadata);
       
-      // Convert multer files to File objects
-      const fileObjects = files.map(file => 
-        new File([file.buffer], file.originalname, { type: file.mimetype })
-      );
+      // Convert multer files to FileData objects
+      const fileObjects = files.map(file => ({
+        name: file.originalname,
+        type: file.mimetype,
+        size: file.size,
+        content: new Uint8Array(file.buffer)
+      }));
 
       // Create vault
       const result = await vaultService.seal(fileObjects, metadata);
@@ -88,7 +91,7 @@ export function createVaultRoutes(
       console.error('Error creating vault:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -128,7 +131,7 @@ export function createVaultRoutes(
       console.error('Error binding vault:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -157,7 +160,7 @@ export function createVaultRoutes(
         success: result.success,
         decrypted_files: result.decrypted_files?.map(file => ({
           name: file.name,
-          content: new Uint8Array(file.stream()),
+          content: file.content,
           mime_type: file.type,
           size: file.size
         })),
@@ -176,7 +179,7 @@ export function createVaultRoutes(
       console.error('Error unsealing vault:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -216,7 +219,7 @@ export function createVaultRoutes(
       console.error('Error rebinding vault:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -243,7 +246,7 @@ export function createVaultRoutes(
       };
 
       // Get vaults from storage (this would be implemented in VaultService)
-      const vaults = []; // Placeholder - implement vault listing
+      const vaults: any[] = []; // Placeholder - implement vault listing
       const total = 0; // Placeholder - implement count
 
       const response: ListVaultsResponse = {
@@ -263,7 +266,7 @@ export function createVaultRoutes(
       console.error('Error listing vaults:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -312,7 +315,7 @@ export function createVaultRoutes(
       console.error('Error getting vault:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }
@@ -357,7 +360,7 @@ export function createVaultRoutes(
       console.error('Error getting vault metadata:', error);
       res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now()
       } as ApiResponse);
     }

@@ -283,7 +283,8 @@ export class VaultService {
     const decryptedPayload = await this.cryptoService.decrypt({
       nonce: seal.nonce,
       ciphertext: seal.ciphertext,
-      tag: seal.integrity_tag
+      tag: seal.integrity_tag,
+      algorithm: seal.encryption_algo
     });
 
     // Extract files from payload
@@ -326,7 +327,7 @@ export class VaultService {
    */
   private extractFiles(payload: Uint8Array): FileData[] {
     // Simple implementation - in production, use proper archive extraction
-    const files: File[] = [];
+    const files: FileData[] = [];
     let offset = 0;
 
     while (offset < payload.length) {
@@ -344,8 +345,13 @@ export class VaultService {
       const contentEnd = contentStart + header.size;
       const content = payload.slice(contentStart, contentEnd);
 
-      // Create file
-      const file = new File([content], header.name, { type: header.type });
+      // Create file data
+      const file: FileData = {
+        name: header.name,
+        type: header.type,
+        size: header.size,
+        content: content
+      };
       files.push(file);
 
       offset = contentEnd;

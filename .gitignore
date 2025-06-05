@@ -96,7 +96,6 @@ jspm_packages/
 .vscode-test
 
 # Bitcoin Core data (if running locally)
-bitcoin/
 testnet3/
 
 # Temporary files

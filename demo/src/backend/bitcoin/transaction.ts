@@ -16,13 +16,13 @@ import {
   AmountCondition,
   TransactionInput,
   TransactionOutput 
-} from '../../shared/types/vault';
+} from '@shared/types/vault';
 import { 
   BITCOIN_NETWORKS, 
   MIN_TRANSACTION_FEE, 
   DUST_THRESHOLD,
   AMOUNT_CONDITION_TYPES 
-} from '../../shared/constants/protocol';
+} from '@shared/constants/protocol';
 
 const ECPair = ECPairFactory(ecc);
 
@@ -196,7 +196,7 @@ export class BitcoinService {
       }
 
     } catch (error) {
-      errors.push(`Transaction parsing error: ${error.message}`);
+      errors.push(`Transaction parsing error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
     return {
@@ -213,7 +213,7 @@ export class BitcoinService {
       const response = await this.rpcCall('sendrawtransaction', [rawHex]);
       return response.result;
     } catch (error) {
-      throw new Error(`Failed to broadcast transaction: ${error.message}`);
+      throw new Error(`Failed to broadcast transaction: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -228,14 +228,14 @@ export class BitcoinService {
       return {
         txid: tx.txid,
         raw_hex: tx.hex,
-        inputs: tx.vin.map((input, index) => this.parseTransactionInput(input, index)),
-        outputs: tx.vout.map(output => this.parseTransactionOutput(output)),
+        inputs: tx.vin.map((input: any, index: number) => this.parseTransactionInput(input, index)),
+        outputs: tx.vout.map((output: any) => this.parseTransactionOutput(output)),
         block_height: tx.blockheight,
         confirmations: tx.confirmations || 0,
         fee: this.calculateFee(tx)
       };
     } catch (error) {
-      throw new Error(`Failed to get transaction status: ${error.message}`);
+      throw new Error(`Failed to get transaction status: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -255,7 +255,7 @@ export class BitcoinService {
         network: this.network === bitcoin.networks.bitcoin ? 'mainnet' : 'testnet'
       };
     } catch (error) {
-      throw new Error(`Failed to get wallet info: ${error.message}`);
+      throw new Error(`Failed to get wallet info: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -374,7 +374,7 @@ export class BitcoinService {
         }
       ];
     } catch (error) {
-      throw new Error(`Failed to get UTXOs: ${error.message}`);
+      throw new Error(`Failed to get UTXOs: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
