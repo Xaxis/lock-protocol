@@ -115,6 +115,21 @@ export interface UnlockVaultResponse {
   proof_of_access?: any;
 }
 
+export interface UnlockAttempt {
+  id: string;
+  vault_id: string;
+  transaction_id: string;
+  timestamp: number;
+  success: boolean;
+  error_message?: string;
+  proof_of_access?: any;
+}
+
+export interface VaultDetailResponse {
+  vault: Vault;
+  unlock_attempts?: UnlockAttempt[];
+}
+
 class ApiService {
   private async request<T>(
     endpoint: string, 
@@ -260,11 +275,14 @@ class ApiService {
     return result.data;
   }
 
-  async getVault(vaultId: string): Promise<Vault> {
-    const response = await this.request<Vault>(`/vaults/${vaultId}`);
+  async getVault(vaultId: string, includeMetadata: boolean = true): Promise<VaultDetailResponse> {
+    console.log(`API: Fetching vault details for ${vaultId}`);
+    const endpoint = `/vaults/${vaultId}${includeMetadata ? '?include_metadata=true' : ''}`;
+    const response = await this.request<VaultDetailResponse>(endpoint);
     if (!response.success) {
       throw new Error(response.error || 'Failed to get vault');
     }
+    console.log(`API: Vault details received for ${vaultId}`);
     return response.data!;
   }
 

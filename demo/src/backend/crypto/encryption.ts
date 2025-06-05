@@ -168,17 +168,44 @@ export class CryptoService {
     key: Uint8Array
   ): Promise<Uint8Array> {
     const crypto = await import('crypto');
-    const decipher = crypto.createDecipheriv('aes-256-gcm', key, encryptedData.nonce);
+
+    // Ensure data is properly converted to Buffer (handle JSON deserialization)
+    const nonce = this.ensureBuffer(encryptedData.nonce);
+    const tag = this.ensureBuffer(encryptedData.tag);
+    const ciphertext = this.ensureBuffer(encryptedData.ciphertext);
+
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, nonce);
 
     // Set the authentication tag
-    decipher.setAuthTag(Buffer.from(encryptedData.tag));
+    decipher.setAuthTag(tag);
 
     const decrypted = Buffer.concat([
-      decipher.update(encryptedData.ciphertext),
+      decipher.update(ciphertext),
       decipher.final()
     ]);
 
     return new Uint8Array(decrypted);
+  }
+
+  /**
+   * Ensures data is converted to Buffer, handling various input types
+   */
+  private ensureBuffer(data: any): Buffer {
+    if (Buffer.isBuffer(data)) {
+      return data;
+    }
+    if (data instanceof Uint8Array) {
+      return Buffer.from(data);
+    }
+    if (Array.isArray(data)) {
+      return Buffer.from(data);
+    }
+    if (typeof data === 'object' && data !== null) {
+      // Handle objects with numeric keys (from JSON deserialization)
+      const values = Object.keys(data).sort((a, b) => parseInt(a) - parseInt(b)).map(key => data[key]);
+      return Buffer.from(values);
+    }
+    throw new Error(`Cannot convert data to Buffer: ${typeof data}`);
   }
 
   /**

@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "outDir": "./dist/backend",
+    "rootDir": "./src",
+    "types": ["node", "jest"],
+    "lib": ["ES2022"]
+  },
+  "include": [
+    "src/backend/**/*.ts",
+    "src/shared/**/*.ts"
+  ],
+  "exclude": [
+    "src/frontend/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/tests/**/*"
+  ]
+}

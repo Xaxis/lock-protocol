@@ -215,28 +215,34 @@ function validateAuthorizedWallet(
 
 /**
  * Validates transaction amount against vault conditions
+ * Checks that the transaction has an output with the required amount
  */
 function validateTransactionAmount(
   transaction: BitcoinTransaction,
   condition: AmountCondition
 ): boolean {
-  const totalSpent = transaction.inputs.reduce((sum, input) => sum + input.value, 0) -
-                    transaction.outputs.reduce((sum, output) => sum + output.value, 0);
+  // For amount validation, we check if any output matches the required amount
+  // This represents the actual value being sent, not the transaction fee
+  const outputAmounts = transaction.outputs.map(output => output.value);
 
   switch (condition.type) {
     case AMOUNT_CONDITION_TYPES.FIXED:
-      return totalSpent === condition.amount;
+      // Check if any output has exactly the required amount
+      return outputAmounts.includes(condition.amount!);
 
     case AMOUNT_CONDITION_TYPES.RANGE:
       // For range conditions, validate against the selected amount from PSBT generation
       if (condition.selected_amount !== undefined) {
-        return totalSpent === condition.selected_amount;
+        return outputAmounts.includes(condition.selected_amount);
       }
-      // Fallback to range validation if selected_amount not available
-      return totalSpent >= condition.min! && totalSpent <= condition.max!;
+      // Fallback to range validation - check if any output is within range
+      return outputAmounts.some(amount =>
+        amount >= condition.min! && amount <= condition.max!
+      );
 
     case AMOUNT_CONDITION_TYPES.ANY:
-      return totalSpent > 0;
+      // Any positive output amount is valid
+      return outputAmounts.some(amount => amount > 0);
 
     default:
       return false;

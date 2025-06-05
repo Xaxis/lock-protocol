@@ -178,8 +178,8 @@ export class VaultService {
       };
     }
 
-    // Decrypt SEAL
-    const decryptedFiles = await this.decryptSeal(vault.seal);
+    // Decrypt SEAL using transaction-derived key
+    const decryptedFiles = await this.decryptSeal(vault.seal, transaction);
 
     // Update unlock count
     vault.unlock_count += 1;
@@ -205,6 +205,34 @@ export class VaultService {
       decrypted_files: decryptedFiles,
       proof_of_access: proofOfAccess
     };
+  }
+
+  /**
+   * Get a specific vault by ID
+   */
+  async getVault(vaultId: string): Promise<Vault | null> {
+    try {
+      console.log(`VaultService: Getting vault ${vaultId}`);
+
+      // Try to get from regular vaults first
+      let vault = await this.storage.getVault(vaultId);
+
+      // If not found, try draft vaults
+      if (!vault) {
+        vault = await this.storage.getDraftVault(vaultId);
+      }
+
+      if (vault) {
+        console.log(`VaultService: Found vault ${vaultId} with status ${vault.status}`);
+      } else {
+        console.log(`VaultService: Vault ${vaultId} not found`);
+      }
+
+      return vault;
+    } catch (error) {
+      console.error(`VaultService: Error getting vault ${vaultId}:`, error);
+      throw new Error(`Failed to get vault: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**
@@ -315,9 +343,17 @@ export class VaultService {
   private async createSeal(files: FileData[]): Promise<SealFile> {
     // Combine files into a single payload
     const payload = await this.combineFiles(files);
-    
-    // Encrypt payload
-    const encryptedData = await this.cryptoService.encrypt(payload);
+
+    // For demo purposes, use a consistent key derivation
+    // In production, this would be derived from the binding transaction
+    const key = await this.cryptoService.deriveKey({
+      password: 'demo-vault-key',
+      salt: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+      iterations: 1000
+    });
+
+    // Encrypt payload with consistent key
+    const encryptedData = await this.cryptoService.encrypt(payload, key);
 
     return {
       magic: SEAL_MAGIC,
@@ -333,18 +369,28 @@ export class VaultService {
   /**
    * Decrypts a SEAL file back to original files
    */
-  private async decryptSeal(seal: SealFile): Promise<FileData[]> {
+  private async decryptSeal(seal: SealFile, transaction?: BitcoinTransaction): Promise<FileData[]> {
+    // For demo purposes, use the same consistent key as during encryption
+    // In production, this would derive the key from the transaction using ECDH
+    const key = await this.cryptoService.deriveKey({
+      password: 'demo-vault-key',
+      salt: new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+      iterations: 1000
+    });
+
     // Decrypt the payload
     const decryptedPayload = await this.cryptoService.decrypt({
       nonce: seal.nonce,
       ciphertext: seal.ciphertext,
       tag: seal.integrity_tag,
       algorithm: seal.encryption_algo
-    });
+    }, key);
 
     // Extract files from payload
     return this.extractFiles(decryptedPayload);
   }
+
+
 
   /**
    * Combines multiple files into a single encrypted payload

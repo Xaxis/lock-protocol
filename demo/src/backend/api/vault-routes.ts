@@ -159,18 +159,36 @@ export function createVaultRoutes(
    */
   router.post('/unseal', async (req: Request, res: Response) => {
     try {
-      const { vault_id, unlock_transaction }: UnsealVaultRequest = req.body;
+      const { vault_id, unlock_transaction, transaction_hex } = req.body;
 
-      if (!vault_id || !unlock_transaction) {
+      if (!vault_id || (!unlock_transaction && !transaction_hex)) {
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          error: 'vault_id and unlock_transaction are required',
+          error: 'vault_id and either unlock_transaction or transaction_hex are required',
           timestamp: Date.now()
         } as ApiResponse);
       }
 
+      let transaction = unlock_transaction;
+
+      // If transaction_hex is provided instead of full transaction object, fetch transaction details
+      if (!transaction && transaction_hex) {
+        try {
+          console.log(`Fetching transaction details for: ${transaction_hex}`);
+          transaction = await bitcoinService.getTransactionStatus(transaction_hex);
+          console.log(`Transaction details fetched successfully for: ${transaction_hex}`);
+        } catch (txError) {
+          console.error(`Failed to fetch transaction ${transaction_hex}:`, txError);
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            error: `Failed to fetch transaction details: ${txError instanceof Error ? txError.message : 'Unknown error'}`,
+            timestamp: Date.now()
+          } as ApiResponse);
+        }
+      }
+
       // Attempt to unseal vault
-      const result = await vaultService.unseal(vault_id, unlock_transaction);
+      const result = await vaultService.unseal(vault_id, transaction);
 
       const response: UnsealVaultResponse = {
         success: result.success,
@@ -305,8 +323,8 @@ export function createVaultRoutes(
         } as ApiResponse);
       }
 
-      // Get vault (this would be implemented in VaultService)
-      const vault = null; // Placeholder - implement vault retrieval
+      // Get vault from storage
+      const vault = await vaultService.getVault(id);
       
       if (!vault) {
         return res.status(HTTP_STATUS.NOT_FOUND).json({

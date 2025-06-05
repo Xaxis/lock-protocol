@@ -6,7 +6,6 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { Vault, UnlockAttempt } from '@shared/types/vault';
-import { VAULT_STATUS } from '../../shared/constants/protocol';
 
 export interface VaultStorage {
   // Draft vault operations
@@ -306,6 +305,9 @@ export class FileVaultStorage implements VaultStorage {
       }
       if (data.seal.integrity_tag && Array.isArray(data.seal.integrity_tag)) {
         data.seal.integrity_tag = new Uint8Array(data.seal.integrity_tag);
+      }
+      if (data.seal.tag && Array.isArray(data.seal.tag)) {
+        data.seal.tag = new Uint8Array(data.seal.tag);
       }
     }
 
