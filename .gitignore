@@ -117,3 +117,7 @@ playwright-report/
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Misc
+*.iml
+.idea
