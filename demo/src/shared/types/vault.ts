@@ -102,24 +102,27 @@ export interface UnlockAttempt {
 export interface BitcoinTransaction {
   /** Transaction ID */
   txid: string;
-  
+
   /** Raw transaction hex */
   raw_hex: string;
-  
+
   /** Transaction inputs */
   inputs: TransactionInput[];
-  
+
   /** Transaction outputs */
   outputs: TransactionOutput[];
-  
+
   /** Block height (if confirmed) */
   block_height?: number;
-  
+
   /** Confirmation count */
   confirmations: number;
-  
+
   /** Network fees paid */
   fee: number;
+
+  /** Transaction timestamp (Unix timestamp) */
+  timestamp?: number;
 }
 
 export interface TransactionInput {

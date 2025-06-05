@@ -21,7 +21,8 @@ export interface CreateVaultRequest {
 export interface CreateVaultResponse {
   vault_id: string;
   seal_file: Uint8Array;
-  psbt: PSBT;
+  psbt: PSBT | null;
+  binding_transaction_required: boolean;
 }
 
 export interface BindVaultRequest {

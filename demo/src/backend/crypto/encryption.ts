@@ -140,22 +140,22 @@ export class CryptoService {
     data: Uint8Array,
     key: Uint8Array
   ): Promise<EncryptedData> {
-    const { createCipher } = await import('crypto');
+    const crypto = await import('crypto');
     const nonce = this.generateNonce(AES_IV_LENGTH);
-    const cipher = createCipher('aes-256-gcm', key);
 
-    const encrypted = Buffer.concat([
-      cipher.update(data),
-      cipher.final()
-    ]);
+    // Use createCipheriv for GCM mode
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, nonce);
 
-    // For demo purposes, create a mock tag
-    const tag = new Uint8Array(16);
+    let encrypted = cipher.update(data);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+
+    // Get the authentication tag
+    const tag = cipher.getAuthTag();
 
     return {
       nonce,
       ciphertext: new Uint8Array(encrypted),
-      tag,
+      tag: new Uint8Array(tag),
       algorithm: ENCRYPTION_ALGORITHMS.AES_256_GCM
     };
   }
@@ -167,8 +167,11 @@ export class CryptoService {
     encryptedData: EncryptedData,
     key: Uint8Array
   ): Promise<Uint8Array> {
-    const { createDecipher } = await import('crypto');
-    const decipher = createDecipher('aes-256-gcm', key);
+    const crypto = await import('crypto');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, encryptedData.nonce);
+
+    // Set the authentication tag
+    decipher.setAuthTag(Buffer.from(encryptedData.tag));
 
     const decrypted = Buffer.concat([
       decipher.update(encryptedData.ciphertext),

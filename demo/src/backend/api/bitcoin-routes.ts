@@ -251,6 +251,49 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
   });
 
   /**
+   * GET /api/bitcoin/wallet/:address/transactions
+   * Get transaction history for a wallet address
+   */
+  router.get('/wallet/:address/transactions', async (req: Request, res: Response) => {
+    try {
+      const { address } = req.params;
+      const { limit } = req.query;
+
+      if (!address) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          error: 'Wallet address is required',
+          timestamp: Date.now()
+        } as ApiResponse);
+      }
+
+      // Get transaction history
+      const transactions = await bitcoinService.getTransactionHistory(
+        address,
+        limit ? parseInt(limit as string) : 10
+      );
+
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        data: {
+          address,
+          transactions,
+          count: transactions.length
+        },
+        timestamp: Date.now()
+      } as ApiResponse);
+
+    } catch (error) {
+      console.error('Error getting transaction history:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: Date.now()
+      } as ApiResponse);
+    }
+  });
+
+  /**
    * GET /api/bitcoin/fees
    * Get current network fee estimates
    */

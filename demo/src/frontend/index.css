@@ -439,3 +439,56 @@ p {
 
 .w-full { width: 100%; }
 .h-full { height: 100%; }
+
+/* Address Display Component */
+.address-display {
+  width: 100%;
+}
+
+.address-display .form-label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Ensure the copy button doesn't interfere with text selection */
+.address-display button {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Hover effects for copy button */
+.address-display button:hover {
+  background-color: #e9ecef !important;
+  border-color: #adb5bd !important;
+}
+
+.address-display button:active {
+  background-color: #dee2e6 !important;
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Success state for copy button */
+.address-display button[title*="Copied"] {
+  background-color: #d4edda !important;
+  border-color: #c3e6cb !important;
+  color: #155724 !important;
+}
+
+/* Responsive adjustments for address display */
+@media (max-width: 768px) {
+  .address-display div[style*="position: relative"] > div {
+    font-size: 0.8rem !important;
+    padding-right: 45px !important;
+  }
+
+  .address-display button {
+    right: 6px !important;
+    min-width: 28px !important;
+    height: 24px !important;
+    font-size: 12px !important;
+  }
+}

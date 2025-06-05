@@ -8,24 +8,27 @@ import { VaultDetailPage } from './components/VaultDetailPage';
 import { UnlockVaultPage } from './components/UnlockVaultPage';
 import { WalletPage } from './components/WalletPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { WalletProvider } from './contexts/WalletContext';
 
 function App() {
   return (
     <ErrorBoundary>
-      <div className="app">
-        <Navigation />
-        <main className="container">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/create" element={<CreateVaultPage />} />
-            <Route path="/vaults" element={<VaultListPage />} />
-            <Route path="/vaults/:id" element={<VaultDetailPage />} />
-            <Route path="/unlock" element={<UnlockVaultPage />} />
-            <Route path="/wallet" element={<WalletPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </main>
-      </div>
+      <WalletProvider>
+        <div className="app">
+          <Navigation />
+          <main className="container">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/create" element={<CreateVaultPage />} />
+              <Route path="/vaults" element={<VaultListPage />} />
+              <Route path="/vaults/:id" element={<VaultDetailPage />} />
+              <Route path="/unlock" element={<UnlockVaultPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </main>
+        </div>
+      </WalletProvider>
     </ErrorBoundary>
   );
 }

@@ -1,58 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
-// Mock vault data for demo
-const mockVaults = [
-  {
-    id: 'vault_123abc',
-    status: 'active',
-    metadata: {
-      description: 'Important documents backup',
-      created_at: Date.now() - 86400000, // 1 day ago
-      authorized_wallet: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-      amount_condition: { type: 'fixed', amount: 10000 },
-      unlock_limit: 1
-    },
-    unlock_count: 0
-  },
-  {
-    id: 'vault_456def',
-    status: 'bound',
-    metadata: {
-      description: 'Family photos collection',
-      created_at: Date.now() - 172800000, // 2 days ago
-      authorized_wallet: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-      amount_condition: { type: 'range', min: 5000, max: 15000 },
-      unlock_limit: 3
-    },
-    unlock_count: 1
-  },
-  {
-    id: 'vault_789ghi',
-    status: 'exhausted',
-    metadata: {
-      description: 'One-time secret message',
-      created_at: Date.now() - 259200000, // 3 days ago
-      authorized_wallet: 'ANY',
-      amount_condition: { type: 'any' },
-      unlock_limit: 1
-    },
-    unlock_count: 1
-  }
-];
+import { useWallet } from '../contexts/WalletContext';
+import { apiService, Vault } from '../services/api';
 
 export function VaultListPage() {
-  const [vaults, setVaults] = useState(mockVaults);
+  const { isConnected, connection } = useWallet();
+  const [vaults, setVaults] = useState<Vault[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Load vaults from API
+    if (isConnected && connection) {
+      loadVaults();
+    }
+  }, [isConnected, connection]);
+
+  const loadVaults = async () => {
+    if (!connection) return;
+
     setLoading(true);
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const result = await apiService.listVaults({
+        walletAddress: connection.address,
+        limit: 50
+      });
+      setVaults(result.vaults);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load vaults';
+      setError(errorMessage);
+      console.error('Failed to load vaults:', err);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
 
   const filteredVaults = vaults.filter(vault => {
     if (filter === 'all') return true;
@@ -87,11 +70,39 @@ export function VaultListPage() {
     }
   };
 
+  // Show wallet connection requirement
+  if (!isConnected) {
+    return (
+      <div className="vault-list-page">
+        <div className="card">
+          <div className="card-header">
+            <h1 className="card-title">My Vaults</h1>
+            <p className="card-subtitle">
+              Connect your wallet to view your vaults
+            </p>
+          </div>
+
+          <div className="text-center p-4">
+            <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔒</div>
+            <h3>Wallet Required</h3>
+            <p>You need to connect a Bitcoin wallet to view your vaults.</p>
+            <a href="/wallet" className="btn btn-primary mt-3">
+              Connect Wallet
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="loading">
-        <div className="spinner"></div>
-        Loading vaults...
+      <div className="vault-list-page">
+        <div className="text-center p-4">
+          <div className="spinner"></div>
+          <h3>Loading vaults...</h3>
+          <p>Fetching your vaults from the blockchain...</p>
+        </div>
       </div>
     );
   }
@@ -100,10 +111,38 @@ export function VaultListPage() {
     <div className="vault-list-page">
       <div className="d-flex justify-between align-center mb-4">
         <h1>My Vaults</h1>
-        <Link to="/create" className="btn btn-primary">
-          Create New Vault
-        </Link>
+        <div className="d-flex" style={{ gap: '12px' }}>
+          <button
+            className="btn btn-outline"
+            onClick={loadVaults}
+            disabled={loading}
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+          <Link to="/create" className="btn btn-primary">
+            Create New Vault
+          </Link>
+        </div>
       </div>
+
+      {error && (
+        <div className="alert alert-error mb-3">
+          <strong>Error:</strong> {error}
+          <button
+            className="btn btn-sm btn-outline ml-2"
+            onClick={() => setError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {connection && (
+        <div className="alert alert-info mb-3">
+          <strong>Connected Wallet:</strong> {connection.address.substring(0, 8)}...{connection.address.substring(connection.address.length - 8)}
+          <span className="ml-2">({connection.network})</span>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="card mb-3">

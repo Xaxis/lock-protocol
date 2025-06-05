@@ -68,17 +68,33 @@ export function createVaultRoutes(
       // Create vault
       const result = await vaultService.seal(fileObjects, metadata);
 
-      // Generate PSBT for binding
-      const psbtResult = await bitcoinService.generatePSBT(
-        metadata.authorized_wallet === "ANY" ? req.body.wallet_address : metadata.authorized_wallet,
-        metadata.amount_condition,
-        metadata.recipient_wallet
-      );
+      // Try to generate PSBT for binding, but don't fail if no UTXOs
+      let psbt = null;
+      let bindingTransactionRequired = false;
+
+      try {
+        const walletAddress = metadata.authorized_wallet === "ANY" ? req.body.wallet_address : metadata.authorized_wallet;
+        if (walletAddress && walletAddress !== "ANY") {
+          const psbtResult = await bitcoinService.generatePSBT(
+            walletAddress,
+            metadata.amount_condition,
+            metadata.recipient_wallet
+          );
+          psbt = psbtResult.psbt;
+          bindingTransactionRequired = true;
+        }
+      } catch (psbtError) {
+        console.warn('PSBT generation failed (demo mode):', psbtError);
+        // For demo purposes, continue without PSBT
+        psbt = null;
+        bindingTransactionRequired = false;
+      }
 
       const response: CreateVaultResponse = {
         vault_id: result.vault_id,
         seal_file: result.seal.ciphertext, // Return encrypted data
-        psbt: psbtResult.psbt
+        psbt,
+        binding_transaction_required: bindingTransactionRequired
       };
 
       res.status(HTTP_STATUS.CREATED).json({
@@ -245,9 +261,9 @@ export function createVaultRoutes(
         offset: parseInt(offset)
       };
 
-      // Get vaults from storage (this would be implemented in VaultService)
-      const vaults: any[] = []; // Placeholder - implement vault listing
-      const total = 0; // Placeholder - implement count
+      // Get vaults from storage
+      const vaults = await vaultService.listVaults(filters);
+      const total = vaults.length; // For now, return all vaults count
 
       const response: ListVaultsResponse = {
         vaults,

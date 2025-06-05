@@ -10,19 +10,19 @@ import {
   BitcoinTransaction, 
   ProofOfAccess,
   RebindRequest 
-} from '../../shared/types/vault';
+} from '@shared/types/vault';
 import { 
   validateVaultMetadata, 
   validateProofOfAccess, 
   generateVaultId 
-} from '../../shared/validation/vault';
+} from '@shared/validation/vault';
 import { 
   VAULT_STATUS, 
   SEAL_MAGIC, 
   SEAL_VERSION, 
   DEFAULT_ENCRYPTION_ALGORITHM,
   ERROR_CODES 
-} from '../../shared/constants/protocol';
+} from '@shared/constants/protocol';
 import { CryptoService } from '../crypto/encryption';
 import { VaultStorage } from '../storage/vault-storage';
 
@@ -80,16 +80,19 @@ export class VaultService {
       tempTxid
     );
 
-    // Store draft vault
-    const draftVault: Vault = {
+    // For demo mode, store as active vault immediately if no binding transaction is required
+    // In production, this would always be stored as draft first
+    const vault: Vault = {
       id: vaultId,
       seal,
       metadata: fullMetadata,
       unlock_count: 0,
-      status: VAULT_STATUS.DRAFT
+      status: VAULT_STATUS.ACTIVE // Active since no binding transaction required in demo
     };
 
-    await this.storage.storeDraftVault(draftVault, metadataForStorage);
+    // Store as regular vault (not draft) for demo mode
+    await this.storage.storeVault(vault);
+    console.log(`VaultService: Stored vault ${vaultId} as active vault`);
 
     return {
       vault_id: vaultId,
@@ -202,6 +205,58 @@ export class VaultService {
       decrypted_files: decryptedFiles,
       proof_of_access: proofOfAccess
     };
+  }
+
+  /**
+   * List vaults with optional filters
+   */
+  async listVaults(filters: {
+    walletAddress?: string;
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Vault[]> {
+    try {
+      console.log('VaultService: Listing vaults with filters:', filters);
+
+      // Get all vaults from storage
+      const allVaults = await this.storage.listVaults();
+      console.log(`VaultService: Found ${allVaults.length} total vaults`);
+
+      // Apply filters
+      let filteredVaults = allVaults;
+
+      // Filter by wallet address
+      if (filters.walletAddress) {
+        filteredVaults = filteredVaults.filter(vault => {
+          const authorizedWallet = vault.metadata.authorized_wallet;
+          if (authorizedWallet === 'ANY') return true;
+          if (Array.isArray(authorizedWallet)) {
+            return authorizedWallet.includes(filters.walletAddress!);
+          }
+          return authorizedWallet === filters.walletAddress;
+        });
+        console.log(`VaultService: After wallet filter: ${filteredVaults.length} vaults`);
+      }
+
+      // Filter by status
+      if (filters.status) {
+        filteredVaults = filteredVaults.filter(vault => vault.status === filters.status);
+        console.log(`VaultService: After status filter: ${filteredVaults.length} vaults`);
+      }
+
+      // Apply pagination
+      const offset = filters.offset || 0;
+      const limit = filters.limit || 20;
+
+      const paginatedVaults = filteredVaults.slice(offset, offset + limit);
+      console.log(`VaultService: After pagination: ${paginatedVaults.length} vaults`);
+
+      return paginatedVaults;
+    } catch (error) {
+      console.error('VaultService: Error listing vaults:', error);
+      throw new Error(`Failed to list vaults: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   /**

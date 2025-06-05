@@ -147,7 +147,7 @@ export class FileVaultStorage implements VaultStorage {
       const filePath = join(this.vaultsDir, `${vaultId}.json`);
       const data = await fs.readFile(filePath, 'utf-8');
       const vault = JSON.parse(data);
-      
+
       return this.deserializeVault(vault);
     } catch (error: any) {
       if (error.code === 'ENOENT') {
@@ -156,6 +156,8 @@ export class FileVaultStorage implements VaultStorage {
       throw error;
     }
   }
+
+
 
   /**
    * Update vault
