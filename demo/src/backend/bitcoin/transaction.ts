@@ -28,20 +28,32 @@ const ECPair = ECPairFactory(ecc);
 
 export class BitcoinService {
   private network: bitcoin.Network;
-  private rpcUrl: string;
-  private rpcAuth?: { user: string; password: string };
+  private networkType: 'testnet' | 'mainnet';
+  private blockstreamApiUrl: string;
+  private mempoolApiUrl: string;
+  private blockcypherApiUrl: string;
+  private blockcypherToken?: string;
 
   constructor(
-    networkType: 'testnet' | 'mainnet' = 'testnet',
-    rpcUrl?: string,
-    rpcAuth?: { user: string; password: string }
+    networkType: 'testnet' | 'mainnet' = 'testnet'
   ) {
-    this.network = networkType === 'mainnet' 
-      ? bitcoin.networks.bitcoin 
+    this.networkType = networkType;
+    this.network = networkType === 'mainnet'
+      ? bitcoin.networks.bitcoin
       : bitcoin.networks.testnet;
-    
-    this.rpcUrl = rpcUrl || this.getDefaultRpcUrl(networkType);
-    this.rpcAuth = rpcAuth;
+
+    // Use public APIs for blockchain data
+    if (networkType === 'testnet') {
+      this.blockstreamApiUrl = process.env.BITCOIN_API_URL || 'https://blockstream.info/testnet/api';
+      this.mempoolApiUrl = process.env.MEMPOOL_API_URL || 'https://mempool.space/testnet/api';
+      this.blockcypherApiUrl = process.env.BLOCKCYPHER_API_URL || 'https://api.blockcypher.com/v1/btc/test3';
+    } else {
+      this.blockstreamApiUrl = 'https://blockstream.info/api';
+      this.mempoolApiUrl = 'https://mempool.space/api';
+      this.blockcypherApiUrl = 'https://api.blockcypher.com/v1/btc/main';
+    }
+
+    this.blockcypherToken = process.env.BLOCKCYPHER_TOKEN;
   }
 
   /**
@@ -206,55 +218,174 @@ export class BitcoinService {
   }
 
   /**
-   * Broadcasts a signed transaction to the network
+   * Broadcasts a signed transaction to the network using Blockstream API
    */
   async broadcastTransaction(rawHex: string): Promise<string> {
     try {
-      const response = await this.rpcCall('sendrawtransaction', [rawHex]);
-      return response.result;
+      console.log(`Broadcasting transaction: ${rawHex.substring(0, 20)}...`);
+
+      // Use Blockstream API to broadcast transaction
+      const response = await axios.post(`${this.blockstreamApiUrl}/tx`, rawHex, {
+        headers: {
+          'Content-Type': 'text/plain'
+        }
+      });
+
+      const txid = response.data;
+      console.log(`Transaction broadcast successfully: ${txid}`);
+      return txid;
     } catch (error) {
+      console.error('Error broadcasting transaction:', error);
+
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data || error.message;
+        throw new Error(`Failed to broadcast transaction: ${errorMessage}`);
+      }
+
       throw new Error(`Failed to broadcast transaction: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
-   * Gets transaction status and details
+   * Gets transaction status and details using Blockstream API
    */
   async getTransactionStatus(txid: string): Promise<BitcoinTransaction> {
     try {
-      const response = await this.rpcCall('getrawtransaction', [txid, true]);
-      const tx = response.result;
+      console.log(`Fetching transaction status for: ${txid}`);
+
+      // Get transaction details from Blockstream API
+      const [txResponse, rawTxResponse] = await Promise.all([
+        axios.get(`${this.blockstreamApiUrl}/tx/${txid}`),
+        axios.get(`${this.blockstreamApiUrl}/tx/${txid}/hex`)
+      ]);
+
+      const tx = txResponse.data;
+      const rawHex = rawTxResponse.data;
+
+      // Parse inputs with values
+      const inputs: TransactionInput[] = [];
+      for (let i = 0; i < tx.vin.length; i++) {
+        const input = tx.vin[i];
+
+        // Get previous transaction to find input value and address
+        let inputValue = 0;
+        let inputAddress = '';
+
+        if (!input.is_coinbase) {
+          try {
+            const prevTxResponse = await axios.get(`${this.blockstreamApiUrl}/tx/${input.txid}`);
+            const prevTx = prevTxResponse.data;
+            const prevOutput = prevTx.vout[input.vout];
+            inputValue = prevOutput.value;
+            inputAddress = prevOutput.scriptpubkey_address || '';
+          } catch (error) {
+            console.warn(`Could not fetch previous transaction ${input.txid}:`, error);
+          }
+        }
+
+        inputs.push({
+          prev_txid: input.txid,
+          prev_vout: input.vout,
+          script_sig: input.scriptsig || '',
+          witness: input.witness || [],
+          value: inputValue,
+          address: inputAddress
+        });
+      }
+
+      // Parse outputs
+      const outputs: TransactionOutput[] = tx.vout.map((output: any) => ({
+        value: output.value,
+        script_pubkey: output.scriptpubkey,
+        address: output.scriptpubkey_address || '',
+        vout: output.n || 0
+      }));
+
+      // Calculate confirmations
+      let confirmations = 0;
+      if (tx.status.confirmed) {
+        try {
+          const tipResponse = await axios.get(`${this.blockstreamApiUrl}/blocks/tip/height`);
+          const currentHeight = tipResponse.data;
+          confirmations = currentHeight - tx.status.block_height + 1;
+        } catch (error) {
+          console.warn('Could not fetch current block height:', error);
+          confirmations = 1; // Assume at least 1 confirmation if confirmed
+        }
+      }
 
       return {
         txid: tx.txid,
-        raw_hex: tx.hex,
-        inputs: tx.vin.map((input: any, index: number) => this.parseTransactionInput(input, index)),
-        outputs: tx.vout.map((output: any) => this.parseTransactionOutput(output)),
-        block_height: tx.blockheight,
-        confirmations: tx.confirmations || 0,
-        fee: this.calculateFee(tx)
+        raw_hex: rawHex,
+        inputs,
+        outputs,
+        block_height: tx.status.block_height || 0,
+        confirmations,
+        fee: tx.fee || 0
       };
     } catch (error) {
+      console.error(`Error fetching transaction ${txid}:`, error);
       throw new Error(`Failed to get transaction status: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
-   * Gets wallet information including balance and UTXOs
+   * Gets wallet information including balance and UTXOs using Blockstream API
    */
   async getWalletInfo(address: string): Promise<WalletInfo> {
     try {
-      const utxos = await this.getWalletUTXOs(address);
-      const balance = utxos.reduce((sum, utxo) => sum + utxo.value, 0);
+      console.log(`Fetching wallet info for address: ${address}`);
+
+      // Validate address format first
+      if (!this.validateAddress(address)) {
+        throw new Error(`Invalid Bitcoin address: ${address}`);
+      }
+
+      // Get UTXOs and address stats in parallel
+      const [utxos, addressStatsResponse] = await Promise.all([
+        this.getWalletUTXOs(address),
+        axios.get(`${this.blockstreamApiUrl}/address/${address}`).catch(() => null)
+      ]);
+
+      // Calculate confirmed and unconfirmed balances
+      const confirmedBalance = utxos
+        .filter(utxo => utxo.confirmed)
+        .reduce((sum, utxo) => sum + utxo.value, 0);
+
+      const unconfirmedBalance = utxos
+        .filter(utxo => !utxo.confirmed)
+        .reduce((sum, utxo) => sum + utxo.value, 0);
+
+      const totalBalance = confirmedBalance + unconfirmedBalance;
+
+      // Get additional stats from address endpoint
+      let transactionCount = 0;
+      let totalReceived = 0;
+      let totalSent = 0;
+
+      if (addressStatsResponse?.data) {
+        const stats = addressStatsResponse.data.chain_stats;
+        transactionCount = stats.tx_count || 0;
+        totalReceived = stats.funded_txo_sum || 0;
+        totalSent = stats.spent_txo_sum || 0;
+      }
+
+      console.log(`Wallet info for ${address}: Balance=${totalBalance} sats, UTXOs=${utxos.length}, TXs=${transactionCount}`);
 
       return {
         address,
         public_key: '', // Would be derived from address in production
-        balance,
+        balance: totalBalance,
+        confirmed_balance: confirmedBalance,
+        unconfirmed_balance: unconfirmedBalance,
         utxos,
-        network: this.network === bitcoin.networks.bitcoin ? 'mainnet' : 'testnet'
+        transaction_count: transactionCount,
+        total_received: totalReceived,
+        total_sent: totalSent,
+        network: this.networkType
       };
     } catch (error) {
+      console.error(`Error fetching wallet info for ${address}:`, error);
       throw new Error(`Failed to get wallet info: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -342,82 +473,105 @@ export class BitcoinService {
   }
 
   /**
-   * Estimates transaction fee
+   * Estimates transaction fee using Mempool.space API
    */
   private async estimateFee(): Promise<number> {
     try {
-      // Simple fee estimation - in production, use proper fee estimation
-      const response = await this.rpcCall('estimatesmartfee', [6]); // 6 blocks
-      const feeRate = response.result.feerate || 0.00001; // BTC per KB
-      const estimatedSize = 250; // Estimated transaction size in bytes
-      return Math.max(Math.ceil(feeRate * estimatedSize * 100000000 / 1000), MIN_TRANSACTION_FEE);
+      // Get fee estimates from Mempool.space
+      const response = await axios.get(`${this.mempoolApiUrl}/v1/fees/recommended`);
+      const feeRates = response.data;
+
+      // Use medium priority fee rate (sat/vB)
+      const feeRatePerVByte = feeRates.halfHourFee || feeRates.hourFee || 10;
+
+      // Estimate transaction size (typical P2WPKH transaction)
+      const estimatedSize = 140; // bytes for 1 input, 2 outputs P2WPKH
+      const estimatedFee = feeRatePerVByte * estimatedSize;
+
+      console.log(`Estimated fee: ${estimatedFee} sats (${feeRatePerVByte} sat/vB)`);
+
+      return Math.max(estimatedFee, MIN_TRANSACTION_FEE);
     } catch (error) {
-      return MIN_TRANSACTION_FEE; // Fallback to minimum fee
+      console.warn('Could not fetch fee estimates, using fallback:', error);
+      return MIN_TRANSACTION_FEE * 10; // Conservative fallback
     }
   }
 
   /**
-   * Gets UTXOs for a wallet address
+   * Gets UTXOs for a wallet address using Blockstream API
    */
   private async getWalletUTXOs(address: string): Promise<UTXO[]> {
     try {
-      // This would typically use a block explorer API or Bitcoin Core RPC
-      // For demo purposes, return mock UTXOs
-      return [
-        {
-          txid: '0'.repeat(64),
-          vout: 0,
-          value: 100000, // 0.001 BTC
-          script_pubkey: '76a914' + '0'.repeat(40) + '88ac',
-          address,
-          confirmed: true
-        }
-      ];
+      console.log(`Fetching UTXOs for address: ${address}`);
+
+      // Use Blockstream API to get UTXOs with timeout
+      const response = await axios.get(`${this.blockstreamApiUrl}/address/${address}/utxo`, {
+        timeout: 10000 // 10 second timeout
+      });
+      const utxos = response.data;
+
+      console.log(`Found ${utxos.length} UTXOs for address ${address}`);
+
+      // Convert to our UTXO format
+      const formattedUtxos: UTXO[] = [];
+
+      for (const utxo of utxos) {
+        // Get transaction details to get script_pubkey
+        const txResponse = await axios.get(`${this.blockstreamApiUrl}/tx/${utxo.txid}`, {
+          timeout: 5000 // 5 second timeout for individual transactions
+        });
+        const tx = txResponse.data;
+        const output = tx.vout[utxo.vout];
+
+        formattedUtxos.push({
+          txid: utxo.txid,
+          vout: utxo.vout,
+          value: utxo.value,
+          script_pubkey: output.scriptpubkey,
+          address: address,
+          confirmed: utxo.status.confirmed
+        });
+      }
+
+      return formattedUtxos;
     } catch (error) {
+      console.error(`Error fetching UTXOs for ${address}:`, error);
+
+      // If the address has no UTXOs or there's an error, return empty array
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        console.log(`No UTXOs found for address ${address}`);
+        return [];
+      }
+
       throw new Error(`Failed to get UTXOs: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
-   * Makes RPC call to Bitcoin node
+   * Gets current block height
    */
-  private async rpcCall(method: string, params: any[] = []): Promise<any> {
-    const payload = {
-      jsonrpc: '2.0',
-      id: Date.now(),
-      method,
-      params
-    };
-
-    const config: any = {
-      method: 'POST',
-      url: this.rpcUrl,
-      data: payload,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-
-    if (this.rpcAuth) {
-      config.auth = this.rpcAuth;
+  async getCurrentBlockHeight(): Promise<number> {
+    try {
+      const response = await axios.get(`${this.blockstreamApiUrl}/blocks/tip/height`, {
+        timeout: 5000 // 5 second timeout
+      });
+      return response.data;
+    } catch (error) {
+      console.warn('Could not fetch current block height:', error);
+      return 0;
     }
-
-    const response = await axios(config);
-    
-    if (response.data.error) {
-      throw new Error(response.data.error.message);
-    }
-
-    return response.data;
   }
 
   /**
-   * Gets default RPC URL for network
+   * Validates Bitcoin address format
    */
-  private getDefaultRpcUrl(network: 'testnet' | 'mainnet'): string {
-    return network === 'mainnet' 
-      ? 'http://localhost:8332' 
-      : 'http://localhost:18332';
+  validateAddress(address: string): boolean {
+    try {
+      bitcoin.address.toOutputScript(address, this.network);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   /**

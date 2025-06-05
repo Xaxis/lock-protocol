@@ -72,12 +72,8 @@ class LockProtocolServer {
 
     // Initialize Bitcoin service
     const network = (process.env.BITCOIN_NETWORK as 'testnet' | 'mainnet') || 'testnet';
-    const rpcUrl = process.env.BITCOIN_RPC_URL;
-    const rpcAuth = process.env.BITCOIN_RPC_USER && process.env.BITCOIN_RPC_PASSWORD 
-      ? { user: process.env.BITCOIN_RPC_USER, password: process.env.BITCOIN_RPC_PASSWORD }
-      : undefined;
 
-    this.bitcoinService = new BitcoinService(network, rpcUrl, rpcAuth);
+    this.bitcoinService = new BitcoinService(network);
   }
 
   /**

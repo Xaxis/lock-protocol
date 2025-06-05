@@ -218,16 +218,31 @@ export interface UTXO {
 export interface WalletInfo {
   /** Wallet address */
   address: string;
-  
+
   /** Public key */
   public_key: string;
-  
-  /** Balance in satoshis */
+
+  /** Total balance in satoshis */
   balance: number;
-  
+
+  /** Confirmed balance in satoshis */
+  confirmed_balance?: number;
+
+  /** Unconfirmed balance in satoshis */
+  unconfirmed_balance?: number;
+
   /** Available UTXOs */
   utxos: UTXO[];
-  
+
+  /** Total number of transactions */
+  transaction_count?: number;
+
+  /** Total amount received in satoshis */
+  total_received?: number;
+
+  /** Total amount sent in satoshis */
+  total_sent?: number;
+
   /** Network (testnet/mainnet) */
   network: "testnet" | "mainnet";
 }

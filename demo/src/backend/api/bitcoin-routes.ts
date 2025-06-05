@@ -351,5 +351,114 @@ export function createBitcoinRoutes(bitcoinService: BitcoinService): Router {
     }
   });
 
+  /**
+   * GET /api/bitcoin/test
+   * Test Bitcoin testnet integration
+   */
+  router.get('/test', async (req: Request, res: Response) => {
+    try {
+      console.log('Testing Bitcoin testnet integration...');
+
+      const testResults: any = {
+        api_endpoints: {
+          blockstream: process.env.BITCOIN_API_URL || 'https://blockstream.info/testnet/api',
+          mempool: process.env.MEMPOOL_API_URL || 'https://mempool.space/testnet/api'
+        },
+        tests: {}
+      };
+
+      // Test 1: Address validation
+      const testAddresses = [
+        'tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx', // Valid testnet bech32
+        'mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef', // Valid testnet legacy
+        'invalid_address', // Invalid
+        'bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4' // Valid mainnet (should be invalid for testnet)
+      ];
+
+      testResults.tests.address_validation = testAddresses.map(addr => ({
+        address: addr,
+        valid: bitcoinService.validateAddress(addr)
+      }));
+
+      // Test 2: Current block height (with timeout)
+      try {
+        const blockHeight = await Promise.race([
+          bitcoinService.getCurrentBlockHeight(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+        ]);
+        testResults.tests.block_height = {
+          success: true,
+          height: blockHeight
+        };
+      } catch (error) {
+        testResults.tests.block_height = {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+
+      // Test 3: Fee estimation (with timeout)
+      try {
+        // Access the private method through a test endpoint
+        const response = await fetch(`${testResults.api_endpoints.mempool}/v1/fees/recommended`);
+        if (response.ok) {
+          const feeData = await response.json();
+          testResults.tests.fee_estimation = {
+            success: true,
+            fees: feeData
+          };
+        } else {
+          throw new Error(`HTTP ${response.status}`);
+        }
+      } catch (error) {
+        testResults.tests.fee_estimation = {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        };
+      }
+
+      // Test 4: Simple wallet info test (only if address is provided in query)
+      const testAddress = req.query.address as string;
+      if (testAddress && bitcoinService.validateAddress(testAddress)) {
+        try {
+          const walletInfo = await Promise.race([
+            bitcoinService.getWalletInfo(testAddress),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout after 10s')), 10000))
+          ]);
+          testResults.tests.wallet_info = {
+            success: true,
+            address: testAddress,
+            data: walletInfo
+          };
+        } catch (error) {
+          testResults.tests.wallet_info = {
+            success: false,
+            address: testAddress,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          };
+        }
+      } else {
+        testResults.tests.wallet_info = {
+          skipped: true,
+          message: 'Provide ?address=<valid_testnet_address> to test wallet info'
+        };
+      }
+
+      res.json({
+        success: true,
+        data: testResults,
+        timestamp: Date.now()
+      } as ApiResponse);
+
+    } catch (error) {
+      console.error('Error testing Bitcoin integration:', error);
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: Date.now()
+      } as ApiResponse);
+    }
+  });
+
   return router;
 }
