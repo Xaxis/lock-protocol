@@ -3,8 +3,8 @@
 
 ---
 
-## Basic QAs
-The fundamentals: terminology, on-chain mechanics, cryptography flows, day-to-day usage, and everything a first-time reader is likely to wonder.  
+> ## Basic QAs
+> The fundamentals: terminology, on-chain mechanics, cryptography flows, day-to-day usage, and everything a first-time reader is likely to wonder.  
 
 ### 1. What is LOCK in one sentence?  
 LOCK is a stateless, server-less protocol that lets anyone encrypt a secret (the “SEAL”), cryptographically bind that ciphertext to a Bitcoin transaction, and guarantee that only a subsequent on-chain action satisfying preset rules can unlock it—eliminating accounts, passwords, and third-party servers.  
@@ -88,8 +88,8 @@ The spec imposes no hard limit, but practical limits come from hosting costs and
 
 ---
 
-## Product QAs
-Implementation ideas, business models, and real-world workflows illustrating how the protocol can underpin actual products.
+> ## Product QAs
+> Implementation ideas, business models, and real-world workflows illustrating how the protocol can underpin actual products.
 
 ### 26. What is the most minimal **proof-of-concept** product?  
 A single-page web app where creators drag-and-drop a file, enter a price, and click **Seal**. The app writes the SEAL to IPFS, returns a public CID plus a Lightning “fallback” invoice for those who prefer LN. Consumers click the link, see the price, pay the on-chain transaction, and the page auto-refreshes when PoA passes, revealing a download button. No user accounts, no database—just client-side JavaScript and an IPFS gateway.  
@@ -144,7 +144,7 @@ A web console shows: SEAL ID, total unlocks, cumulative revenue, top spender add
 Technically yes: they can whip up a PSBT returning sats to the spender’s address. However, refunds defeat the irreversible nature of Proof-of-Work. Most businesses would instead reseal a second secret labelled “refund voucher” and unlock it to the aggrieved user for free.  
 
 ### 41. What **open-source licences** best fit LOCK-gated software?  
-Dual licences. Offer GPL-3 for non-commercial users unlocked trivially (or given away), and a commercial licence sealed behind a 0.01 BTC paywall. The on-chain proof acts as purchase evidence.  
+Dual licences. Offer GPL-3 for non-commercial users unlocked trivially (or given away), and a commercial licence sealed behind a 0.01 BTC paywall. The on-chain proof acts as purchase evidence. 
 
 ### 42. Describe a **charity pay-to-reveal** campaign.  
 An NGO seals a high-resolution report detailing illegal deforestation evidence. Unlock condition: “When cumulative donations to address X reach 5 BTC, the report decrypts automatically.” Donors collectively fund the target; the final transaction pushes the total over the threshold, PoA passes, the secret becomes public.  
@@ -160,8 +160,8 @@ Yes. Seal the manuscript; require a payment plus an OP_RETURN that encodes the b
 
 ---
 
-## Security QAs
-Deep-dive into attack surfaces, cryptographic nuances, operational hazards, and mitigation strategies.
+> ## Security QAs
+> Deep-dive into attack surfaces, cryptographic nuances, operational hazards, and mitigation strategies.
 
 ### 46. What happens if the **IV** is reused?  
 AES-GCM with a repeated IV under the same key destroys confidentiality and authentication. Attackers can compute XOR of plaintexts. Clients must use a cryptographically secure random number generator and include self-tests that detect IV collisions during CI.  
@@ -225,8 +225,8 @@ The spec encourages third-party auditors to publish test vectors and compliance 
 
 ---
 
-## Pragmatic QAs
-Broader considerations—economics, ethics, network effects, and the project’s place in Bitcoin’s evolving landscape.
+> ## Pragmatic QAs
+> Broader considerations—economics, ethics, network effects, and the project’s place in Bitcoin’s evolving landscape.
 
 ### 66. Why anchor access to **energy expenditure** instead of identity?  
 Energy is objective, unforgeable, and politically neutral. Identity systems embed jurisdiction, regulation, and censorship. By tying decryption to a burned fee or real spend, LOCK ensures that the gatekeeper is physics, not paperwork.  
@@ -278,8 +278,8 @@ Possibly. In the early web, static files were free; commerce layers came later. 
 
 ---
 
-## Future QAs
-Speculative research directions, roadmap milestones, and open questions for the community.
+> ## Future QAs
+> Speculative research directions, roadmap milestones, and open questions for the community.
 
 ### 82. What is the path to **formal verification**?  
 Translate the PoA state machine into TLA+ or Coq. Prove safety (if PoA passes, rules were satisfied) and liveness (if rules are satisfied, PoA eventually passes). Generate executable test cases from proofs and integrate into CI for all client libraries.  
