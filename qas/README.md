@@ -22,3 +22,6 @@ Below is a **top-level table of contents** that links to the five stand-alone Q&
 
 5. **[Future QAs](./FUTURE_QAS.md)**  
    *Speculative research directions, roadmap milestones, and open questions for the community.*
+
+6. **[LockxOrangeCheck QAs](./LOCK-OC_QAS.md)**  
+   *Synergies, distinctions, and real-world product patterns for combining a secrecy primitive (Lock) with a stake-weighted identity primitive (OrangeCheck).*
