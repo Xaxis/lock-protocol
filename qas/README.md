@@ -1,7 +1,5 @@
 # LOCK Protocol – Question & Answer Compendium  
 
-Below is a **top-level table of contents** that links to the five stand-alone Q&A files.
-
 > LOCK is best understood not as a product but as a **primitive**—like public-key cryptography or hash functions. It turns Bitcoin’s thermodynamic finality into a programmable access layer. From micro-paywalled journalism to multi-sig enterprise secrets, from whistle-blower dead-man’s switches to Taproot-embedded royalty splits, the design space stretches wide. This document captures the most pressing questions—obvious, obscure, philosophical, and forward-looking—to help builders reason about that space. If you have a question not answered here, open an issue or start a discussion; every hard question we ask now prevents a critical oversight later. 
 
 ---
