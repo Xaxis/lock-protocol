@@ -132,3 +132,23 @@ Employees’ OrangeCheck badges sign receipt requests; employer badges confirm s
 ### Product pattern #20 — **Supply-Chain Compliance Vault**  
 Testing certificates per shipment are Lock-sealed; customs unlock upon arrival spend.  
 Shippers maintain high-value OrangeCheck badges; revocation flags non-compliant cargo automatically.  
+
+### Product pattern #21 — Stake-Verified Professional Credential Ledger  
+Universities and employers issue transcripts, certificates, and reference letters as Lock-sealed blobs.  
+Endorsers attach a signature from their OrangeCheck badge; the badge’s **stake × uptime** boosts the credibility score of each credential. A fake reference can be publicly challenged: spending (or force-closing) the endorser’s bond revokes the signature everywhere, slashing their reputation.
+
+### Product pattern #22 — Reputation-Weighted P2P Skill-Share Marketplace  
+Teachers post course materials as Lock SEALs; students unlock after payment spends.  
+A teacher’s OrangeCheck badge weight determines search ranking and payout advance limits. Negative dispute outcomes slash part of the teacher’s stake, automatically lowering future visibility without a centralized rating server.
+
+### Product pattern #23 — Stake-Backed Web-of-Trust Passport  
+Every “friend” or organization that vouches for you does so by Lock-sealing a short attestation (e.g., *“I have known @alice five years”*).  
+Their OrangeCheck stake key signs the SEAL hash; verifiers aggregate these proofs, weighting each by the signer’s badge value and age. A signer caught issuing spam attestations can simply spend their bond—instantly voiding all endorsements linked to that key.
+
+### Product pattern #24 — Slashing-Enabled Decentralized Certificate Authority  
+TLS certificates and SSH host keys are stored as Lock SEALs and served over IPFS.  
+Issuing CAs must keep large OrangeCheck stakes; mis-issuance accusations include the offending key’s txid. If the CA cannot defend the issuance, it voluntarily spends (burns) its bond—immediately revoking trust in every certificate it signed, with no browser update lag.
+
+### Product pattern #25 — Anonymous Credit Oracle with Proof-of-Stake Collateral  
+Borrowers encrypt their payment history and salary proofs as Lock SEALs.  
+Third-party scorers analyze the data off-chain and publish a credit score signed by their OrangeCheck badge. Lenders accept scores only from badges whose staked value exceeds a set multiple of the requested loan; if a score proves fraudulent, the scorer’s bond is slashed, compensating the lender while preserving borrower privacy.
