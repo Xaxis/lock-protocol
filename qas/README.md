@@ -107,7 +107,7 @@ Indirectly. The creator reseals content monthly with a new SEAL ID and unlock ru
 ### 30. What is a **dead-man’s switch** product powered by LOCK?  
 A whistle-blower encrypts incriminating documents. Unlock rules: “Anyone may pay at least 0.05 BTC *after* block 900 000.” They publish the SEAL CID publicly. As long as the whistle-blower keeps resetting the earliest block in a hypothetical “Re-seal” feature, the secret stays locked. If they die or are silenced, activists can unlock by paying the fee, triggering automatic publication.  
 
-### 31. Outline a **ticketing** implementation for events.  
+### 31. A **ticketing** implementation for events?  
 Each seat has a unique QR code embedded in a SEAL. Unlock conditions: “Pay exactly 100 000 sats to stadium-multisig within time window T.” Once a spectator pays, PoA reveals the seat’s QR, which is scanned at entry. No scalpers can double-sell because the spending transaction is single-use and publicly verifiable.  
 
 ### 32. Could LOCK facilitate **royalty splits**?  
