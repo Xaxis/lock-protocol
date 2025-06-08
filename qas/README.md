@@ -1,6 +1,6 @@
 # LOCK Protocol – Extensive Question & Answer Compendium  
 
-> ## Basic QAs
+## Basic QAs
 > The fundamentals: terminology, on-chain mechanics, cryptography flows, day-to-day usage, and everything a first-time reader is likely to wonder.  
 
 ### 1. What is LOCK in one sentence?  
@@ -85,7 +85,7 @@ The spec imposes no hard limit, but practical limits come from hosting costs and
 
 ---
 
-> ## Product QAs
+## Product QAs
 > Implementation ideas, business models, and real-world workflows illustrating how the protocol can underpin actual products.
 
 ### 26. What is the most minimal **proof-of-concept** product?  
@@ -157,7 +157,7 @@ Yes. Seal the manuscript; require a payment plus an OP_RETURN that encodes the b
 
 ---
 
-> ## Security QAs
+## Security QAs
 > Deep-dive into attack surfaces, cryptographic nuances, operational hazards, and mitigation strategies.
 
 ### 46. What happens if the **IV** is reused?  
@@ -222,7 +222,7 @@ The spec encourages third-party auditors to publish test vectors and compliance 
 
 ---
 
-> ## Pragmatic QAs
+## Pragmatic QAs
 > Broader considerations—economics, ethics, network effects, and the project’s place in Bitcoin’s evolving landscape.
 
 ### 66. Why anchor access to **energy expenditure** instead of identity?  
@@ -275,7 +275,7 @@ Possibly. In the early web, static files were free; commerce layers came later. 
 
 ---
 
-> ## Future QAs
+## Future QAs
 > Speculative research directions, roadmap milestones, and open questions for the community.
 
 ### 82. What is the path to **formal verification**?  
