@@ -1,4 +1,4 @@
-## LOCK Protocol – End-to-End Flow (Mermaid)
+## LOCK Protocol – End-to-End Flow
 
 ```mermaid
 %% LOCK: sealing → binding → proof-of-access → unsealing
