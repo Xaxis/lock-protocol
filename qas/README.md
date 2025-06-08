@@ -1,6 +1,6 @@
 # LOCK Protocol – Question & Answer Compendium  
 
-*A categorized, living knowledge base for builders, researchers, and strategists exploring every facet of the LOCK protocol.
+*A categorized, living knowledge base for builders, researchers, and strategists exploring every facet of the LOCK protocol.*
 
 ---
 
