@@ -8,7 +8,7 @@ LOCK is a stateless, server-less protocol that lets anyone encrypt a secret (the
 The word “seal” evokes a wax seal on a letter: tamper evidence and privacy in one primitive. In LOCK, a SEAL is a byte blob containing the ciphertext, encrypted metadata, and a short plaintext header. Breaking the seal (decrypting) is impossible until the unlock rules—also hidden inside—are satisfied by a qualifying Bitcoin spend.  
 
 ### How does **sealing** actually happen step-by-step?  
-1. A user selects a plaintext payload (file, JSON, license key, API token).  
+1. A user selects a raw payload (anything from a tiny licence key to a multi-gigabyte archive). 
 2. They choose unlock criteria: authorised wallet, minimum amount, earliest block-height, optional unlock-limit, allowed recipients, minimum fee-rate, etc.  
 3. The client generates a fresh 96-bit IV and a random ECDH key-pair or reuses an existing one.  
 4. It performs ECDH with the intended unlocker’s public key, feeds the shared secret plus the SEAL hash into HKDF, and derives a 256-bit symmetric key.  
