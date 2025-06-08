@@ -143,7 +143,7 @@ Technically yes: they can whip up a PSBT returning sats to the spender’s addre
 ### 41. What **open-source licences** best fit LOCK-gated software?  
 Dual licences. Offer GPL-3 for non-commercial users unlocked trivially (or given away), and a commercial licence sealed behind a 0.01 BTC paywall. The on-chain proof acts as purchase evidence. 
 
-### 42. Describe a **charity pay-to-reveal** campaign.  
+### 42. How would a **charity pay-to-reveal** campaign work?
 An NGO seals a high-resolution report detailing illegal deforestation evidence. Unlock condition: “When cumulative donations to address X reach 5 BTC, the report decrypts automatically.” Donors collectively fund the target; the final transaction pushes the total over the threshold, PoA passes, the secret becomes public.  
 
 ### 43. How might a **content bundle** sale work during a holiday?  
