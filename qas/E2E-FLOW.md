@@ -1,9 +1,5 @@
 ## LOCK Protocol – End-to-End Flow (Mermaid)
 
-> **Note for GitHub / GitLab / MkDocs users**  
-> The diagram below follows the stricter GitHub-flavoured Mermaid syntax (no nested brackets, HTML line-breaks use `<br/>`, sub-graph `direction` declared after the title).  
-> Copy the whole block—including the `mermaid` fences—into your README or docs page and it should render without errors.
-
 ```mermaid
 %% LOCK: sealing → binding → proof-of-access → unsealing
 %% Layout is Left-to-Right for readability
@@ -76,3 +72,25 @@ graph LR
   classDef seal fill:#D97706,stroke:#6B3A00,color:#fff;
   class SEAL seal;
 ```
+
+---
+
+### How to read the diagram
+
+1. **Sealing (far left)** – Everything happens offline: the creator composes metadata, derives a symmetric key via **ECDH → HKDF**, encrypts the payload with an AEAD cipher, and outputs an opaque **SEAL** blob.  
+2. **Binding** – A PSBT is prepared and signed by the user’s wallet. Broadcasting the transaction spends real satoshis in a way that satisfies the hidden rules.  
+3. **Bitcoin Network** – After the transaction gains sufficient, non-replaceable confirmations, the vault is considered **bound** (emerald node “Vault bound”).  
+4. **Proof-of-Access (right)** – Any compliant client feeds the confirmed `txid` plus the SEAL into its PoA engine. The engine validates each hidden rule, re-derives the symmetric key, decrypts, and—if every check succeeds—reveals the plaintext secret. One wrong bit anywhere and AEAD authentication fails, so nothing leaks.
+
+---
+
+**Color legend**
+
+| Palette (hex) | Meaning |
+|---------------|---------|
+| **Orange** `#F7931A` | Bitcoin-on-chain interactions & final Tx |
+| **Charcoal** `#323232` | Cryptographic primitives (IV, ECDH, HKDF, AEAD) |
+| **Steel-blue** `#1E40AF` | User actions, files, wallet steps |
+| **Grey** `#4B5563` | PoA validation logic |
+| **Emerald** `#059669` | Success states (“Vault bound”, unlocked secret) |
+| **Dark-orange** `#D97706` | The SEAL blob itself |
