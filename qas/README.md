@@ -1,5 +1,4 @@
 # LOCK Protocol – Extensive Question & Answer Compendium  
-*Version 1.0*  
 
 ---
 
