@@ -1,7 +1,5 @@
 # LOCK Protocol – Extensive Question & Answer Compendium  
 
----
-
 > ## Basic QAs
 > The fundamentals: terminology, on-chain mechanics, cryptography flows, day-to-day usage, and everything a first-time reader is likely to wonder.  
 
